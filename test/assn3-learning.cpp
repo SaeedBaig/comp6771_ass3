@@ -13,15 +13,28 @@ using namespace std;
 template <typename N, typename E>
 class Graph {
  public:
-	struct Edge {
-	    Edge(N from, N to, E weight):from_(from),to_(to),weight_(weight) {}
+	class Edge {
+		public:
+			Edge(N from, N to, E weight):from_(from),to_(to),weight_(weight) {}
+			//Edge(std::weak_ptr<N> from, std::<N> to, E weight):from_(from),to_(to),weight_(weight) {}
+
+			N GetFrom() {
+				return from_;
+			}
+
+			N GetTo() {
+				return to_;
+			}
+
+			E GetWeight() {
+				return weight_;
+			}
 
 	 private:
 		N from_;
 		N to_;
 		E weight_;
 	};
-
 
   Graph<N, E>() {}
 
@@ -55,7 +68,7 @@ class Graph {
 	  while(start!=end) {
 		  std::cout << *start << std::endl;
 		  auto copy = *start;
-		  nodes.insert(copy);
+		  nodes_.insert(copy);
 		  start++;
 	  }
   }
@@ -66,14 +79,34 @@ class Graph {
 		  Edge e {std::get<0>(curr),std::get<1>(curr),std::get<2>(curr)};
 		  //edges.insert(e);
 		  //TODO: add the custom iteartor check in here
-		  edges.push_back(e);
+		  edges_.push_back(e);
 	  	  start++;
 	  }
   }
 
+  Graph<N, E>(typename std::initializer_list<N> list) {
+	  for(const auto element:list) {
+		  nodes_.insert(element);
+	  }
+  }
+
+  Graph<N, E>(const Graph<N, E>& graph) {
+	  nodes_=graph.nodes_;
+
+	  for(auto e: graph.edges_) {
+		  Edge copy_edge {e.GetFrom(),e.GetTo(),e.GetWeight()};
+		  edges_.push_back(copy_edge);
+	  }
+  }
+
+  Graph<N, E>(Graph<N, E>&& graph) {
+	  nodes_=std::move(graph.nodes_);
+	  edges_=std::move(graph.edges_);
+  }
+
   bool isNode(const N& val) {
 	  //contains
-	  if(nodes.find(val)!=nodes.end()) {
+	  if(nodes_.find(val)!=nodes_.end()) {
 		  return true;
 	  }
 	  return false;
@@ -95,15 +128,14 @@ class Graph {
  */
 
  private:
-  	  std::weak_ptr<N> node_name_;
+  	  std::weak_ptr<N> node_name_; //need to use this
   	  std::weak_ptr<E> weight_;
 
-  	  std::unordered_set<N> nodes;
-  	  std::vector<Edge> edges;
+  	  std::unordered_set<N> nodes_;
+  	  std::vector<Edge> edges_;
 };
 
 int main() {
-	std::cout << "test" << std::endl;
 	//Graph<std::string,double> graph {"melbourne",2.2};
 	/*
 	Graph<std::string,int> a;
@@ -121,7 +153,7 @@ int main() {
 			}
 
 	}
-	*/
+
 	//
 	{
 		std::string s1{"Hello"};
@@ -144,6 +176,32 @@ int main() {
 					std::cout << "false" << std::endl;
 				}
 	}
+
+
+	{
+		Graph<char, std::string> b{'a', 'b', 'x', 'y'};
+
+		if (b.isNode('H')) {
+			std::cout << "true" << std::endl;
+		} else {
+			std::cout << "false" << std::endl;
+		}
+
+		if (b.isNode('x')) {
+			std::cout << "true" << std::endl;
+		} else {
+			std::cout << "false" << std::endl;
+		}
+	}*/
+
+	{
+		std::vector<std::string> v{"Hello", "how", "are", "you"};
+		//gdwg::Graph<std::string, double> b{v.begin(),v.end()};
+		Graph<std::string, double> b{v.begin(),v.end()};
+		Graph<std::string, double> aCopy{b};
+
+	}
+
 
 
 	return 0;

@@ -2,6 +2,8 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <unordered_set>
+#include <tuple>
 #include <set>
 
 using namespace std;
@@ -11,7 +13,19 @@ using namespace std;
 template <typename N, typename E>
 class Graph {
  public:
-  //constructors
+	struct Edge {
+	    Edge(N from, N to, E weight):from_(from),to_(to),weight_(weight) {}
+
+	 private:
+		N from_;
+		N to_;
+		E weight_;
+	};
+
+
+  Graph<N, E>() {}
+
+  //custom test constructors
   Graph<N, E>(N node_name, E weight) {
 	  //node_name_ = node_name;
 	  //weight_ = weight;
@@ -32,50 +46,105 @@ class Graph {
 	  }
   }
 
-  //template <typename std::vector<N>::const_iterator>
-  Graph<N, E>(typename std::vector<N>::const_iterator first, typename std::vector<N>::const_iterator end) {
-	  while(first!=end) {
-		  std::cout << *first << std::endl;
-		  first++;
-	  }
+  ~Graph<N,E>() {
+	  std::cout << "hello i am graph and i am out of scope!" << std::endl;
   }
 
-  /*
-  Graph<N, E>(std::vector<std::string>::const_iterator start, std::vector<std::string>::const_iterator end) {
+  //template <typename std::vector<N>::const_iterator>
+  Graph<N, E>(typename std::vector<N>::const_iterator start, typename std::vector<N>::const_iterator end) {
 	  while(start!=end) {
 		  std::cout << *start << std::endl;
+		  auto copy = *start;
+		  nodes.insert(copy);
 		  start++;
 	  }
   }
-  */
 
+  Graph<N, E>(typename std::vector<std::tuple<N, N, E>>::const_iterator start, typename std::vector<std::tuple<N, N, E>>::const_iterator end) {
+	  while(start!=end) {
+		  auto curr = *start;
+		  Edge e {std::get<0>(curr),std::get<1>(curr),std::get<2>(curr)};
+		  //edges.insert(e);
+		  //TODO: add the custom iteartor check in here
+		  edges.push_back(e);
+	  	  start++;
+	  }
+  }
+
+  bool isNode(const N& val) {
+	  //contains
+	  if(nodes.find(val)!=nodes.end()) {
+		  return true;
+	  }
+	  return false;
+
+  }
 
   /*
-  E GetWeight() {
-	  return *weight_;
-  }
+  const_iterator find(const N& from, const N& to, const E& weight) {
+	 //std::<vector<std::<Edge>> constItr::iteartor=edges.begin();
+	 for(auto e:edges) {
 
-  N GetNodeName() {
-	  return *node_name_;
-  }
-  */
+		 if (e.from_==from && e.to_==to && e.weight_==weight) {
+			 return true;
+		 }
+	 }
 
+	 return false;
+ }
+ */
 
  private:
   	  std::weak_ptr<N> node_name_;
   	  std::weak_ptr<E> weight_;
 
-  	  std::set<N> nodes;
-  	  std::set<E> edges;
+  	  std::unordered_set<N> nodes;
+  	  std::vector<Edge> edges;
 };
 
 int main() {
 	std::cout << "test" << std::endl;
 	//Graph<std::string,double> graph {"melbourne",2.2};
+	/*
+	Graph<std::string,int> a;
+	std::cout << a.isNode("hello") << '\n';
+	Graph<std::string,double> dougraph;
 
-	std::vector<std::string> v{"Hello", "how", "are", "you"};
-	//gdwg::Graph<std::string, double> b{v.begin(),v.end()};
-	Graph<std::string, double> b{v.begin(),v.end()};
+	{
+		std::vector<std::string> v{"Hello", "how", "are", "you"};
+			//gdwg::Graph<std::string, double> b{v.begin(),v.end()};
+			Graph<std::string, double> b{v.begin(),v.end()};
+			if (b.isNode("Hello")) {
+				std::cout << "true" << std::endl;
+			} else {
+				std::cout << "false" << std::endl;
+			}
+
+	}
+	*/
+	//
+	{
+		std::string s1{"Hello"};
+		std::string s2{"how"};
+		std::string s3{"are"};
+		auto e1 = std::make_tuple(s1, s2, 5.4);
+		auto e2 = std::make_tuple(s2, s3, 7.6);
+		auto e = std::vector<std::tuple<std::string, std::string, double>>{e1, e2};
+		Graph<std::string, double> b{e.begin(), e.end()};
+
+		if (b.isNode("Hello")) {
+			std::cout << "true" << std::endl;
+		} else {
+			std::cout << "false" << std::endl;
+		}
+
+		if (b.isNode("test")) {
+					std::cout << "true" << std::endl;
+				} else {
+					std::cout << "false" << std::endl;
+				}
+	}
+
 
 	return 0;
 }

@@ -1,45 +1,73 @@
 #ifndef ASSIGNMENTS_DG_GRAPH_H_
 #define ASSIGNMENTS_DG_GRAPH_H_
 
-#include <set>
+#include <string>
 #include <memory>
+#include <vector>
+#include <unordered_set>
+#include <tuple>
+#include <set>
+#include <iostream>
 
 namespace gdwg {
 
 template <typename N, typename E>
-//n for string
-//e for double
-
 class Graph {
  public:
   class const_iterator {};
-
   //constructors
-  gdwg::Graph<N, E>();
+  /*
+  Graph<N, E>() {
+	  std::cout << "<N,E> constructor called" << std::endl;
+  }
+  */
 
-  gdwg::Graph<N, E>(
-    std::vector<N>::const_iterator,
-    std::vector<N>::const_iterator
-  );
+  Graph() {
+	 std::cout << "default constructor called" << std::endl;
+  }
 
-  gdwg::Graph<N, E>(
-    std::vector<std::tuple<N, N, E>>::const_iterator,
-    std::vector<std::tuple<N, N, E>>::const_iterator
-  );
+  class Edge {
+	public:
+		Edge(N from, N to, E weight):from_(from),to_(to),weight_(weight) {}
 
-  gdwg::Graph<N, E>(std::initializer_list<N>);
+		N& GetFrom() {
+			return from_;
+		}
 
-  gdwg::Graph<N, E>(const gdwg::Graph<N, E>&);
+		N& GetTo() {
+			return to_;
+		}
 
-  gdwg::Graph<N, E>(gdwg::Graph<N, E>&&);
+		E& GetWeight() {
+			return weight_;
+		}
 
-  ~gdwg::Graph<N, E>();
+	 private:
+		N from_;
+		N to_;
+		E weight_;
+  	};
+  Graph<N, E>(typename std::vector<N>::const_iterator start,typename std::vector<N>::const_iterator end);
 
-  gdwg::Graph<N, E>& operator=(const gdwg::Graph<N, E>&);
+  Graph<N, E>(typename std::vector<std::tuple<N, N, E>>::const_iterator start,
+    typename std::vector<std::tuple<N, N, E>>::const_iterator end);
 
-  gdwg::Graph<N, E>& operator=(gdwg::Graph<N, E>&&);
+  Graph<N, E>(std::initializer_list<N> list);
 
+  Graph<N, E>(const Graph<N, E>& graph);
+
+  Graph<N, E>(Graph<N, E>&& graph);
+
+  //~gdwg::Graph<N, E>();
+  //~Graph<N, E>();
+  ~Graph<N,E>() {}
+
+  //Graph<N, E>& operator=(const Graph<N, E>&);
+
+  //Graph<N, E>& operator=(Graph<N, E>&&);
+  bool IsNode(const N& val);
   //methods
+  /*
   bool InsertNode(const N& val);
   bool InsertEdge(const N& src, const N& dst, const E& w);
   bool DeleteNode(const N& node);
@@ -58,23 +86,17 @@ class Graph {
   const_iterator erase(const_iterator it);
   const_iterator cbegin();
   const_iterator cend();
+  */
 
  private:
- 	std::set<N> nodes_;
- 	std::set<Edge> edges_;
+	  std::weak_ptr<N> node_name_; //need to use this
+	  std::weak_ptr<E> weight_;
+
+	  std::unordered_set<N> nodes_;
+	  std::vector<Edge> edges_;
 };
+}
 
-class Edge {
- public:
-
- private:
- 	weak_ptr<N> from;
- 	weak_ptr<N> to;
- 	E weight;
-};
-
-}  // namespace gdwg
-
+//#include "assignments/dg/graph.tpp"
 #include "assignments/dg/graph.tpp"
-
 #endif  // ASSIGNMENTS_DG_GRAPH_H_

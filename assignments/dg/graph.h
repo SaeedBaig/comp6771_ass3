@@ -15,16 +15,8 @@ template <typename N, typename E>
 class Graph {
  public:
   class const_iterator {};
-  //constructors
-  /*
-  Graph<N, E>() {
-	  std::cout << "<N,E> constructor called" << std::endl;
-  }
-  */
 
-  Graph() {
-	 std::cout << "default constructor called" << std::endl;
-  }
+  Graph() {}
 
   class Edge {
 	public:
@@ -58,16 +50,12 @@ class Graph {
 
   Graph<N, E>(Graph<N, E>&& graph);
 
-  //~gdwg::Graph<N, E>();
-  //~Graph<N, E>();
   ~Graph<N,E>() {}
 
-  //Graph<N, E>& operator=(const Graph<N, E>&);
+  Graph<N, E>& operator=(const Graph<N, E>& graph);
+  Graph<N, E>& operator=(Graph<N, E>&& graph);
 
-  //Graph<N, E>& operator=(Graph<N, E>&&);
-  bool IsNode(const N& val);
   //methods
-  /*
   bool InsertNode(const N& val);
   bool InsertEdge(const N& src, const N& dst, const E& w);
   bool DeleteNode(const N& node);
@@ -86,7 +74,6 @@ class Graph {
   const_iterator erase(const_iterator it);
   const_iterator cbegin();
   const_iterator cend();
-  */
 
  private:
 	  std::weak_ptr<N> node_name_; //need to use this

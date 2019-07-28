@@ -4,17 +4,15 @@
 //using namespace gdwg;
 
 int main() {
-	//Graph<std::string,int> a;
-	//gdwg::Graph<int, int> a;
-	//gdwg::Graph<int, int> b {};
-
-	std::vector<std::string> v{"Hello", "how", "are", "you"};
-	gdwg::Graph<std::string, double> b{v.begin(),v.end()};
-
-	if (b.IsNode("Hello")) {
-			std::cout << "true" << std::endl;
-		} else {
-			std::cout << "false" << std::endl;
-	}
+	std::string s1{"Hello"};
+	std::string s2{"how"};
+	std::string s3{"are"};
+	auto e1 = std::make_tuple(s1, s2, 5.4);
+	auto e2 = std::make_tuple(s2, s3, 7.6);
+	auto e = std::vector<std::tuple<std::string, std::string, double>>{e1, e2};
+	Graph<std::string, double> graph{e.begin(), e.end()};
+	std::cout << graph.IsNode("Hello") << std::endl;
+	std::cout << graph.IsNode("how") << std::endl;
+	std::cout << graph.IsNode("are") << std::endl;
 	return 0;
 }

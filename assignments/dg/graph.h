@@ -17,28 +17,32 @@ class Graph {
   class const_iterator {};
 
   Graph() {}
+  struct Edge {
+  		//public:
+  		Edge(N from, N to, E weight) {
+			auto share_ptr_for_from=std::make_shared<N>(from);
+			from_ = share_ptr_for_from;
 
-  class Edge {
-	public:
-		Edge(N from, N to, E weight):from_(from),to_(to),weight_(weight) {}
+			auto share_ptr_for_to=std::make_shared<N>(to);
+			to_ = share_ptr_for_to;
 
-		N& GetFrom() {
-			return from_;
+			auto share_ptr_for_weight=std::make_shared<E>(weight);
+			weight_ = share_ptr_for_weight;
+  		}
+
+		~Edge() {
+			std::cout << "edge descructor called" << std::endl;
 		}
 
-		N& GetTo() {
-			return to_;
-		}
-
-		E& GetWeight() {
-			return weight_;
-		}
-
-	 private:
-		N from_;
-		N to_;
-		E weight_;
+		std::shared_ptr<N> from_; //should be weak pointer
+		std::shared_ptr<N> to_; // should be weak pointer
+		std::shared_ptr<E> weight_;
   	};
+
+  std::unordered_set<std::shared_ptr<N>> getList() {
+	  return nodes_;
+  }
+
   Graph<N, E>(typename std::vector<N>::const_iterator start,typename std::vector<N>::const_iterator end);
 
   Graph<N, E>(typename std::vector<std::tuple<N, N, E>>::const_iterator start,
@@ -76,11 +80,8 @@ class Graph {
   const_iterator cend();
 
  private:
-	  std::weak_ptr<N> node_name_; //need to use this
-	  std::weak_ptr<E> weight_;
-
-	  std::unordered_set<N> nodes_;
-	  std::vector<Edge> edges_;
+	  std::unordered_set<std::shared_ptr<N>> nodes_;
+	  std::vector<std::shared_ptr<Edge>> edges_; // stored in the stack
 };
 }
 

@@ -26,7 +26,13 @@ SCENARIO("Constructor with 2 iterators") {
 	WHEN("Default constructor is called") {
 		std::vector<std::string> v{"Hello", "how", "are", "you"};
 		gdwg::Graph<std::string, double> graph{v.begin(),v.end()};
-			THEN("There should be no segmentation fault") {
+		/*
+		auto list = graph.getList();
+		for(auto l:list) {
+			std::cout << *l << std::endl;
+		}
+		*/
+		THEN("There should be no segmentation fault") {
 				REQUIRE(graph.IsNode("Hello")==true);
 				REQUIRE(graph.IsNode("how")==true);
 				REQUIRE(graph.IsNode("are")==true);
@@ -170,4 +176,28 @@ SCENARIO("Move operator test") {
 	}
 }
 
+SCENARIO("Insert edge test") {
 
+	std::string s1{"Hello"};
+	std::string s2{"how"};
+	std::string s3{"are"};
+	auto e1 = std::make_tuple(s1, s2, 5.4);
+	auto e2 = std::make_tuple(s2, s3, 7.6);
+	auto e = std::vector<std::tuple<std::string, std::string, double>>{e1, e2};
+	Graph<std::string, double> graph{e.begin(), e.end()};
+
+	WHEN("Creating an new edge to the existing graph") {
+		//inserting an new edge to the existing graph
+		std::string u{"c"};
+		graph.InsertEdge("a",u,1);
+
+		THEN("The new edge should be inserted") {
+			REQUIRE(graph.IsNode("Hello")==true);
+			REQUIRE(graph.IsNode("how")==true);
+			REQUIRE(graph.IsNode("are")==true);
+			REQUIRE(graph.IsNode("a")==true);
+			REQUIRE(graph.IsNode("c")==true);
+			REQUIRE(graph.InsertEdge("a",u,1)==false);
+		}
+	}
+}

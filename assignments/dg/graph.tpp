@@ -5,8 +5,7 @@ using namespace gdwg;
 template <typename N, typename E>
 Graph<N, E>::Graph(typename std::vector<N>::const_iterator start, typename std::vector<N>::const_iterator end) {
 	while(start!=end) {
-		  //std::cout << *start << std::endl;
-		  nodes_.insert(std::make_shared<N>(*start));
+		  nodes_.push_back(std::make_shared<Node>(*start));
 		  start++;
 	  }
 }
@@ -17,12 +16,10 @@ Graph<N, E>::Graph(typename std::vector<std::tuple<N, N, E>>::const_iterator sta
 	  while(start!=end) {
 		  auto curr = *start;
 		  Edge e {std::get<0>(curr),std::get<1>(curr),std::get<2>(curr)};
-		  //edges.insert(e);
 		  //TODO: add the custom iteartor check in here
 		  edges_.push_back(std::make_shared<Edge>(e));
-		  std::cout << std::get<0>(curr) << std::get<1>(curr) << std::endl;
-		  nodes_.insert(std::make_shared<N>(std::get<0>(curr)));
-		  nodes_.insert(std::make_shared<N>(std::get<1>(curr)));
+		  nodes_.push_back(std::make_shared<Node>(std::get<0>(curr)));
+		  nodes_.push_back(std::make_shared<Node>(std::get<1>(curr)));
 	  	  start++;
 	  }
 }
@@ -30,7 +27,7 @@ Graph<N, E>::Graph(typename std::vector<std::tuple<N, N, E>>::const_iterator sta
 template <typename N, typename E>
 Graph<N, E>::Graph(typename std::initializer_list<N> list) {
 	  for(const auto element:list) {
-		  nodes_.insert(std::make_shared<N>(element));
+		  nodes_.push_back(std::make_shared<Node>(element));
 	  }
  }
 
@@ -42,8 +39,8 @@ Graph<N, E>::Graph(const Graph<N, E>& graph) {
 	  	  Edge copy_edge {*e->from_,*e->to_,*e->weight_};
 	  	  //TODO: add redundant check
 		  edges_.push_back(std::make_shared<Edge>(copy_edge));
-		  nodes_.insert(std::make_shared<N>(*e->from_));
-		  nodes_.insert(std::make_shared<N>(*e->to_));
+		  nodes_.push_back(std::make_shared<Node>(*e->from_));
+		  nodes_.push_back(std::make_shared<Node>(*e->to_));
 	  }
 }
 
@@ -62,8 +59,8 @@ Graph<N, E>& Graph<N,E>::operator=(const Graph<N, E>& graph) {
 	  	  Edge copy_edge{*e->from_,*e->to_,*e->weight_};
 		  edges_.push_back(std::make_shared<Edge>(copy_edge));
 		  //TODO: add redundant check
-		  nodes_.insert(std::make_shared<N>(*e->from_));
-		  nodes_.insert(std::make_shared<N>(*e->to_));
+		  nodes_.push_back(std::make_shared<Node>(*e->from_));
+		  nodes_.push_back(std::make_shared<Node>(*e->to_));
 	  }
 	  return *this;
 }
@@ -79,14 +76,13 @@ Graph<N, E>& Graph<N,E>::operator=(Graph<N, E>&& graph) {
 
 template <typename N, typename E>
 bool Graph<N,E>::IsNode(const N& val) {
-	  auto search_iter = std::find_if(nodes_.begin(), nodes_.end(), [&val](std::shared_ptr<N> n) {
-	          return *n == val;
+	  auto search_iter = std::find_if(nodes_.begin(), nodes_.end(), [&val](std::shared_ptr<Node> n) {
+	          return n->getNodeName() == val;
 	  });
 	  
 	  if (search_iter!=nodes_.end()) {
 	  	return true;
 	  }
-	  
 	  return false;
 }
 
@@ -96,7 +92,7 @@ bool Graph<N,E>::InsertNode(const N& val) {
 		return false;
 	}
 	
-	nodes_.insert(std::make_shared<N>(val));
+	nodes_.push_back(std::make_shared<Node>(val));
 	return true;
 }
 
@@ -109,8 +105,8 @@ bool Graph<N,E>::InsertEdge(const N& src, const N& dst, const E& w) {
 		  Edge tmpEdge {src,dst,w};
 		  auto sharedPtr = std::make_shared<Edge>(tmpEdge);
 		  edges_.push_back(sharedPtr);
-		  nodes_.insert(std::make_shared<N>(src));
-		  nodes_.insert(std::make_shared<N>(dst));
+		  nodes_.push_back(std::make_shared<Node>(src));
+		  nodes_.push_back(std::make_shared<Node>(dst));
 		  return true;
 	  }
 
@@ -125,8 +121,8 @@ bool Graph<N,E>::InsertEdge(const N& src, const N& dst, const E& w) {
 	  Edge tmpEdge {src,dst,w};
 	  auto sharedPtr = std::make_shared<Edge>(tmpEdge);
 	  edges_.push_back(sharedPtr);
-	  nodes_.insert(std::make_shared<N>(src));
-	  nodes_.insert(std::make_shared<N>(dst));
+	  nodes_.push_back(std::make_shared<Node>(src));
+	  nodes_.push_back(std::make_shared<Node>(dst));
   	  return true;
 }
 
@@ -144,8 +140,8 @@ template <typename N, typename E>
 
 bool Graph<N,E>::DeleteNode(const N& val) {
 	
-	auto del_iter = std::find_if(nodes_.begin(), nodes_.end(), [&val](std::shared_ptr<N> n){
-	  return *n == val;
+	auto del_iter = std::find_if(nodes_.begin(), nodes_.end(), [&val](std::shared_ptr<Node> n){
+	  return n->getNodeName() == val;
 	});
 
 	if(del_iter == nodes_.end()) return false;
@@ -174,7 +170,10 @@ bool Graph<N,E>::DeleteNode(const N& val) {
 	
 }
 
+/*
+template <typename N, typename E>
 bool Graph<N,E>::Replace(const N& oldData, const N& newData) {
+	
 	//replace node data 
 	
 	//search for the node
@@ -191,3 +190,5 @@ bool Graph<N,E>::Replace(const N& oldData, const N& newData) {
   	//deleting by iterator is the only way
 	//replace edge data
 }
+
+*/

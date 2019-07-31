@@ -20,25 +20,25 @@ class Graph {
 
   struct Node {
 
-  	Node (std::string node_name) {
-  		node_name_=std::make_shared<std::string>(node_name);
+  	Node (const N node_name) {
+  		node_name_=std::make_shared<N>(node_name);
   	}
 
-  	void replaceNodeName(std::string node_name) {
+  	void replaceNodeName(N new_node_name) {
   		node_name_.reset();
-  		node_name_=std::make_shared<std::string>(node_name);
+  		node_name_=std::make_shared<N>(new_node_name);
   	}
 
-  	std::string getNodeName() {
+  	N getNodeName() {
   		return *node_name_;
   	}
 
-  	std::shared_ptr<std::string> node_name_;
+  	std::shared_ptr<N> node_name_;
   };
 
 
   struct Edge {
-  		//public:
+
   		Edge(N from, N to, E weight) {
 			auto share_ptr_for_from=std::make_shared<N>(from);
 			from_ = share_ptr_for_from;
@@ -100,7 +100,7 @@ class Graph {
   const_iterator cend();
 
  private:
-	  std::unordered_set<std::shared_ptr<N>> nodes_;
+	  std::vector<std::shared_ptr<Node>> nodes_;
 	  std::vector<std::shared_ptr<Edge>> edges_; // stored in the stack
 };
 }

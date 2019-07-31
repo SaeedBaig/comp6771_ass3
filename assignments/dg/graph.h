@@ -17,6 +17,26 @@ class Graph {
   class const_iterator {};
 
   Graph() {}
+
+  struct Node {
+
+  	Node (std::string node_name) {
+  		node_name_=std::make_shared<std::string>(node_name);
+  	}
+
+  	void replaceNodeName(std::string node_name) {
+  		node_name_.reset();
+  		node_name_=std::make_shared<std::string>(node_name);
+  	}
+
+  	std::string getNodeName() {
+  		return *node_name_;
+  	}
+
+  	std::shared_ptr<std::string> node_name_;
+  };
+
+
   struct Edge {
   		//public:
   		Edge(N from, N to, E weight) {
@@ -62,7 +82,7 @@ class Graph {
   //methods
   bool InsertNode(const N& val);
   bool InsertEdge(const N& src, const N& dst, const E& w);
-  bool DeleteNode(const N& node);
+  bool DeleteNode(const N& val);
   bool Replace(const N& oldData, const N& newData);
   void MergeReplace(const N& oldData, const N& newData);
   void Clear();
@@ -84,6 +104,13 @@ class Graph {
 	  std::vector<std::shared_ptr<Edge>> edges_; // stored in the stack
 };
 }
+
+//helper methods
+template <typename N, typename E>
+//return the first found edge that contains either the soruce or the destination that matches the parameter value
+//or otherwise null
+auto GetEdgeIterByValue(const N& value);
+
 
 //#include "assignments/dg/graph.tpp"
 #include "assignments/dg/graph.tpp"

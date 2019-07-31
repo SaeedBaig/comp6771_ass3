@@ -11,7 +11,6 @@ Graph<N, E>::Graph(typename std::vector<N>::const_iterator start, typename std::
 	  }
 }
 
-
 template <typename N, typename E>
 Graph<N, E>::Graph(typename std::vector<std::tuple<N, N, E>>::const_iterator start,
     typename std::vector<std::tuple<N, N, E>>::const_iterator end) {
@@ -41,8 +40,8 @@ Graph<N, E>::Graph(const Graph<N, E>& graph) {
 
 	  for(auto e: graph.edges_) {
 	  	  Edge copy_edge {*e->from_,*e->to_,*e->weight_};
+	  	  //TODO: add redundant check
 		  edges_.push_back(std::make_shared<Edge>(copy_edge));
-		  //TODO: add redundant check
 		  nodes_.insert(std::make_shared<N>(*e->from_));
 		  nodes_.insert(std::make_shared<N>(*e->to_));
 	  }
@@ -53,7 +52,6 @@ Graph<N, E>::Graph(Graph<N, E>&& graph) {
 	  nodes_=std::move(graph.nodes_);
 	  edges_=std::move(graph.edges_);
 }
-
 
 template <typename N, typename E>
 //EuclideanVector& EuclideanVector:: operator=(const EuclideanVector& vec)
@@ -81,21 +79,14 @@ Graph<N, E>& Graph<N,E>::operator=(Graph<N, E>&& graph) {
 
 template <typename N, typename E>
 bool Graph<N,E>::IsNode(const N& val) {
-	for (auto curr: nodes_) {
-		if (*curr == val) {
-			return true;
-		}
-	}
-	  /*
-	  if(nodes_.find(val)!=nodes_.end()) {
-		  return true;
+	  auto search_iter = std::find_if(nodes_.begin(), nodes_.end(), [&val](std::shared_ptr<N> n) {
+	          return *n == val;
+	  });
+	  
+	  if (search_iter!=nodes_.end()) {
+	  	return true;
 	  }
 	  
-	  
-	  if(nodes_.find(std::make_shared<N>(val))!=nodes_.end()) {
-		  return true;
-	  }
-	  */
 	  return false;
 }
 
@@ -141,27 +132,62 @@ bool Graph<N,E>::InsertEdge(const N& src, const N& dst, const E& w) {
 
 /*
 template <typename N, typename E>
-//true if removed or otherwise false
-
-bool Graph<N,E>::DeleteNode(const N&) {
-	//pre-condition:assume after each time inserting edges nodes keep track of the item
-	if(!IsNode(N)) {
-		return false;
-	}
-	
-	nodes_.erase (N);
-	
-	std::vector<N>::iterator iter;
-	//this method only work once
-	for(iter=edges_.begin();iter!=edges_.end();iter++) {
-	
-	}
-
-	for(auto& edge: edges_ ) {
-		if(edge.GetFrom()==N) {
-			edges_.
-		}
-	}
-	
+auto GetEdgeIterByValue(const N& value) {
+	auto edge_iter = std::find_if(edges_.begin(), edges_.end(), [&val](std::shared_ptr<Edge> edge){
+	        return *edge->from_ == val || *edge->to_==val;
+	});
 }
 */
+
+template <typename N, typename E>
+//true if removed or otherwise false
+
+bool Graph<N,E>::DeleteNode(const N& val) {
+	
+	auto del_iter = std::find_if(nodes_.begin(), nodes_.end(), [&val](std::shared_ptr<N> n){
+	  return *n == val;
+	});
+
+	if(del_iter == nodes_.end()) return false;
+	nodes_.erase(del_iter);
+
+	//TODO: while(hasEdge) del->edge, del,nodes,associated
+	//start deleting edges
+	
+	/*
+	std::unordered_set<std::shared_ptr<N>> nodes_to_be_deleted;
+	
+	while (auto edge_iter = GetEdgeIterByValue(val)==edges_end()) {
+		nodes_to_be_deleted.insert(*edge_iter->from_);
+		nodes_to_be_deleted.insert(*edge_iter->to_);
+	}
+	*/
+	
+	auto edge_iter = std::find_if(edges_.begin(), edges_.end(), [&val](std::shared_ptr<Edge> edge){
+	        return *edge->from_ == val || *edge->to_==val;
+	});
+
+	if(edge_iter == edges_.end()) return false;
+	edges_.erase(edge_iter);
+
+  	return true;
+	
+}
+
+bool Graph<N,E>::Replace(const N& oldData, const N& newData) {
+	//replace node data 
+	
+	//search for the node
+	auto search_iter = std::find_if(nodes_.begin(), nodes_.end(), [&val](std::shared_ptr<N> n) {
+          return *n == val;
+  	});
+  	
+  	//found element
+  	if (search_iter != nodes_.end()) {
+  		//access the content of the iter element
+  		
+  	}
+  	
+  	//deleting by iterator is the only way
+	//replace edge data
+}

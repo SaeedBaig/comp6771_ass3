@@ -201,3 +201,32 @@ SCENARIO("Insert edge test") {
 		}
 	}
 }
+
+SCENARIO("Delete edge test") {
+	  gdwg::Graph<std::string, int> g;
+	  g.InsertNode("hello");
+	  g.InsertNode("how");
+	  g.InsertNode("are");
+	  g.InsertNode("you?");
+
+	  g.InsertEdge("hello", "how", 5);
+	  g.InsertEdge("hello", "are", 8);
+	  g.InsertEdge("hello", "are", 2);
+
+
+
+
+	WHEN("Deleting some nodes with node names") {
+		REQUIRE(g.IsNode("hello")==true);
+		REQUIRE(g.IsNode("how")==true);
+		REQUIRE(g.IsNode("are")==true);
+		REQUIRE(g.IsNode("you?")==true);
+		g.DeleteNode("hello");
+
+		THEN("Certain nodes and edges should be removed") {
+			REQUIRE(g.IsNode("hello?")==false);
+			//chedk edge
+		}
+	}
+}
+

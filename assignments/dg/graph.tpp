@@ -1,194 +1,350 @@
 //implementation for graph
-#include <string>
 
+#include "graph.h"
 using namespace gdwg;
+
 template <typename N, typename E>
 Graph<N, E>::Graph(typename std::vector<N>::const_iterator start, typename std::vector<N>::const_iterator end) {
-	while(start!=end) {
-		  nodes_.push_back(std::make_shared<Node>(*start));
-		  start++;
-	  }
+	for (auto it = start; it != end; ++it) {
+	      InsertNode(*it);
+	}
 }
 
 template <typename N, typename E>
 Graph<N, E>::Graph(typename std::vector<std::tuple<N, N, E>>::const_iterator start,
     typename std::vector<std::tuple<N, N, E>>::const_iterator end) {
-	  while(start!=end) {
-		  auto curr = *start;
-		  Edge e {std::get<0>(curr),std::get<1>(curr),std::get<2>(curr)};
-		  //TODO: add the custom iteartor check in here
-		  edges_.push_back(std::make_shared<Edge>(e));
-		  nodes_.push_back(std::make_shared<Node>(std::get<0>(curr)));
-		  nodes_.push_back(std::make_shared<Node>(std::get<1>(curr)));
-	  	  start++;
-	  }
+		for (auto it = start; it != end; ++it) {
+		  const N& src = std::get<0>(*it);
+		  const N& dst = std::get<1>(*it);
+		  const E& w = std::get<2>(*it);
+
+		  InsertNode(src);
+		  InsertNode(dst);
+		  InsertEdge(src, dst, w);
+		}
+		std::sort(edges_.begin(), edges_.end());
 }
 
 template <typename N, typename E>
 Graph<N, E>::Graph(typename std::initializer_list<N> list) {
-	  for(const auto element:list) {
-		  nodes_.push_back(std::make_shared<Node>(element));
-	  }
- }
-
-template <typename N, typename E>
-Graph<N, E>::Graph(const Graph<N, E>& graph) {
-	  nodes_=graph.nodes_;
-
-	  for(auto e: graph.edges_) {
-	  	  Edge copy_edge {*e->from_,*e->to_,*e->weight_};
-	  	  //TODO: add redundant check
-		  edges_.push_back(std::make_shared<Edge>(copy_edge));
-		  nodes_.push_back(std::make_shared<Node>(*e->from_));
-		  nodes_.push_back(std::make_shared<Node>(*e->to_));
+	  for(const N& element:list) {
+		  InsertNode(element);
 	  }
 }
 
 template <typename N, typename E>
-Graph<N, E>::Graph(Graph<N, E>&& graph) {
-	  nodes_=std::move(graph.nodes_);
-	  edges_=std::move(graph.edges_);
+Graph<N, E>::Graph(const Graph& other) {
+    // copy their nodes
+    for (const auto& node : other.nodes_) {
+      InsertNode(*(node.node_ptr_));
+    }
+
+    // copy their edges
+    for (const auto& edge : other.edges_) {
+      InsertEdge(*(edge.src_ptr_), *(edge.dst_ptr_), *(edge.weight_ptr_));
+    }
+
+    std::sort(edges_.begin(), edges_.end());
 }
 
 template <typename N, typename E>
-//EuclideanVector& EuclideanVector:: operator=(const EuclideanVector& vec)
-Graph<N, E>& Graph<N,E>::operator=(const Graph<N, E>& graph) {
-	  nodes_=graph.nodes_;
-
-	  for(auto e: graph.edges_) {
-	  	  Edge copy_edge{*e->from_,*e->to_,*e->weight_};
-		  edges_.push_back(std::make_shared<Edge>(copy_edge));
-		  //TODO: add redundant check
-		  nodes_.push_back(std::make_shared<Node>(*e->from_));
-		  nodes_.push_back(std::make_shared<Node>(*e->to_));
-	  }
-	  return *this;
+Graph<N, E>::Graph(Graph&& other) : nodes_{std::move(other.nodes_)}, edges_{std::move(other.edges_)} {
+    std::sort(edges_.begin(), edges_.end());
 }
 
 template <typename N, typename E>
-Graph<N, E>& Graph<N,E>::operator=(Graph<N, E>&& graph) {
-	std::cout << "move operator called" << std::endl;
-	nodes_=std::move(graph.nodes_);
-	//fix this
-	//edges_=std::move(graph.edges_);
-	return *this;
+Graph<N, E>& Graph<N,E>::operator=(const Graph<N, E>& other) {
+  	  nodes_.clear();
+  	  edges_.clear();
+
+  	  // copy their nodes
+    for (const auto& node : other.nodes_) {
+      InsertNode(*(node.node_ptr_));
+    }
+
+    // copy their edges
+    for (const auto& edge : other.edges_) {
+      InsertEdge(*(edge.src_ptr_), *(edge.dst_ptr_), *(edge.weight_ptr_));
+    }
+    std::sort(edges_.begin(), edges_.end());
+
+    return *this;
 }
 
 template <typename N, typename E>
-bool Graph<N,E>::IsNode(const N& val) {
-	  auto search_iter = std::find_if(nodes_.begin(), nodes_.end(), [&val](std::shared_ptr<Node> n) {
-	          return n->getNodeName() == val;
-	  });
-	  
-	  if (search_iter!=nodes_.end()) {
-	  	return true;
-	  }
-	  return false;
+Graph<N, E>& Graph<N,E>::operator=(Graph<N, E>&& other) {
+	nodes_ = std::move(other.nodes_);
+  	edges_ = std::move(other.edges_);
+  	return *this;
+}
+
+
+template <typename N, typename E>
+bool Graph<N,E>::IsNode(const N& val) const {
+	return std::find(nodes_.cbegin(), nodes_.cend(), Node{val}) != nodes_.end();
 }
 
 template <typename N, typename E>
 bool Graph<N,E>::InsertNode(const N& val) {
-	if (IsNode(val)) {
-		return false;
-	}
-	
-	nodes_.push_back(std::make_shared<Node>(val));
+    if (IsNode(val)) {
+      return false;
+    }
+    nodes_.push_back(Node{val});
+    return true;
+}
+
+template <typename N, typename E>
+bool Graph<N,E>::InsertEdge(const N& src, const N& dst, const E& w) {
+	if (!IsNode(src) || !IsNode(dst)) {
+	      throw std::runtime_error(
+	    "Cannot call Graph::InsertEdge when either src or dst node does not exist"
+	      );
+	    }
+
+	    const auto src_iter = std::find(nodes_.cbegin(), nodes_.cend(), Node{src});
+	    const auto dst_iter = std::find(nodes_.cbegin(), nodes_.cend(), Node{dst});
+	    const Edge new_edge{(*src_iter).node_ptr_, (*dst_iter).node_ptr_, w};
+
+	    // if edge already in graph
+	    if (std::find(edges_.cbegin(), edges_.cend(), new_edge) != edges_.end()) {
+	      return false;
+	    } // else
+
+	    edges_.push_back(new_edge);
+	    std::sort(edges_.begin(), edges_.end());
 	return true;
 }
 
 
-template <typename N, typename E>
-bool Graph<N,E>::InsertEdge(const N& src, const N& dst, const E& w) {
-	 //std::cout << "method called " << edges_.size() << std::endl;
-
-	  if(edges_.size()==0) {
-		  Edge tmpEdge {src,dst,w};
-		  auto sharedPtr = std::make_shared<Edge>(tmpEdge);
-		  edges_.push_back(sharedPtr);
-		  nodes_.push_back(std::make_shared<Node>(src));
-		  nodes_.push_back(std::make_shared<Node>(dst));
-		  return true;
-	  }
-
-	  for(auto edge: edges_) {
-		//std::cout << *edge->from_ << " " << *edge->to_ << " " << *edge->weight_ << std::endl;
-		if ((*edge->from_)==src &&(*edge->to_)==dst && (*edge->weight_)==w) {
-			std::cout << "false found!" << *edge->from_ << std::endl;
-			return false;
-		}
-	  }
-
-	  Edge tmpEdge {src,dst,w};
-	  auto sharedPtr = std::make_shared<Edge>(tmpEdge);
-	  edges_.push_back(sharedPtr);
-	  nodes_.push_back(std::make_shared<Node>(src));
-	  nodes_.push_back(std::make_shared<Node>(dst));
-  	  return true;
-}
-
-/*
-template <typename N, typename E>
-auto GetEdgeIterByValue(const N& value) {
-	auto edge_iter = std::find_if(edges_.begin(), edges_.end(), [&val](std::shared_ptr<Edge> edge){
-	        return *edge->from_ == val || *edge->to_==val;
-	});
-}
-*/
 
 template <typename N, typename E>
-//true if removed or otherwise false
+bool Graph<N,E>::DeleteNode(const N& n) {
+    if (!IsNode(n)) {
+      return false;
+    } // else
 
-bool Graph<N,E>::DeleteNode(const N& val) {
-	
-	auto del_iter = std::find_if(nodes_.begin(), nodes_.end(), [&val](std::shared_ptr<Node> n){
-	  return n->getNodeName() == val;
-	});
+    // delete all edges containing n (uses the erase-remove idiom)
+    edges_.erase(std::remove_if(edges_.begin(), edges_.end(),
+      [&](const Edge& edge) {
+        return *(edge.src_ptr_) == n || *(edge.dst_ptr_) == n;
+      }),
+    edges_.end());
 
-	if(del_iter == nodes_.end()) return false;
-	nodes_.erase(del_iter);
+    std::sort(edges_.begin(), edges_.end());
 
-	//TODO: while(hasEdge) del->edge, del,nodes,associated
-	//start deleting edges
-	
-	/*
-	std::unordered_set<std::shared_ptr<N>> nodes_to_be_deleted;
-	
-	while (auto edge_iter = GetEdgeIterByValue(val)==edges_end()) {
-		nodes_to_be_deleted.insert(*edge_iter->from_);
-		nodes_to_be_deleted.insert(*edge_iter->to_);
-	}
-	*/
-	
-	auto edge_iter = std::find_if(edges_.begin(), edges_.end(), [&val](std::shared_ptr<Edge> edge){
-	        return *edge->from_ == val || *edge->to_==val;
-	});
-
-	if(edge_iter == edges_.end()) return false;
-	edges_.erase(edge_iter);
-
-  	return true;
-	
+    // then delete n from nodes
+    nodes_.erase(std::find(nodes_.cbegin(), nodes_.cend(), Node{n}));
+    return true;
 }
 
-/*
+template <typename N, typename E>
+bool Graph<N,E>::IsConnected(const N& src, const N& dst) const {
+	if (!IsNode(src) || !IsNode(dst)) {
+      throw std::runtime_error(
+    "Cannot call Graph::IsConnected if src or dst node don't exist in the graph"
+      );
+    }
+
+    return std::any_of(edges_.cbegin(), edges_.cend(), [&](const Edge& edge) {
+      return *(edge.src_ptr_) == src && *(edge.dst_ptr_) == dst;
+    });
+}
+
 template <typename N, typename E>
 bool Graph<N,E>::Replace(const N& oldData, const N& newData) {
-	
-	//replace node data 
-	
-	//search for the node
-	auto search_iter = std::find_if(nodes_.begin(), nodes_.end(), [&val](std::shared_ptr<N> n) {
-          return *n == val;
-  	});
-  	
-  	//found element
-  	if (search_iter != nodes_.end()) {
-  		//access the content of the iter element
-  		
-  	}
-  	
-  	//deleting by iterator is the only way
-	//replace edge data
+	if (!IsNode(oldData)) {
+      throw
+      std::runtime_error("Cannot call Graph::Replace on a node that doesn't exist");
+    }
+
+    if (IsNode(newData)) {
+      return false;
+    } // else
+
+    // replace oldData with newData
+    auto src_iter = std::find(nodes_.cbegin(), nodes_.cend(), Node{oldData});
+    *((*src_iter).node_ptr_) = newData;
+
+    std::sort(edges_.begin(), edges_.end());
+    return true;
 }
 
+//start from here
+
+template <typename N, typename E>
+void Graph<N,E>::MergeReplace(const N& oldData, const N& newData) {
+	if (!IsNode(oldData) || !IsNode(newData)) {
+      throw std::runtime_error(
+      "Cannot call Graph::MergeReplace on old or new data if they don't exist in the graph"
+      );
+    }
+
+    // replace oldData with newData
+    auto src_iter = std::find(nodes_.cbegin(), nodes_.cend(), Node{oldData});
+    *((*src_iter).node_ptr_) = newData;
+
+    //
+    // look for and delete duplicate edges
+    // The following code borrowed from:
+    // https://en.cppreference.com/w/cpp/algorithm/unique
+    //
+    // sort edges_
+    std::sort(edges_.begin(), edges_.end());
+    // remove adjacent duplicates
+    auto last = std::unique(edges_.begin(), edges_.end());
+    // remove undefined values
+    edges_.erase(last, edges_.end());
+}
+
+template <typename N, typename E>
+void Graph<N,E>::Clear() {
+  edges_.clear();
+  nodes_.clear();
+}
+
+template <typename N, typename E>
+std::vector<N> Graph<N,E>::GetNodes() const {
+    std::vector<N> result;
+    for (const auto& node : nodes_) {
+      const N copy_val = *(node.node_ptr_);
+      result.push_back(copy_val);
+    }
+    std::sort(result.begin(), result.end());
+    return result;
+}
+
+template <typename N, typename E>
+std::vector<N> Graph<N,E>::GetConnected(const N& src) const {
+  if (!IsNode(src)) {
+    throw std::out_of_range(
+    "Cannot call Graph::GetConnected if src doesn't exist in the graph");
+  }
+
+  std::vector<N> result;
+  for (const auto& edge : edges_) {
+    if (*(edge.src_ptr_) == src) {
+      const N copy_val = *(edge.dst_ptr_);
+      result.push_back(copy_val);
+    }
+  }
+
+  // sort
+  std::sort(result.begin(), result.end());
+  // remove adjacent duplicates
+  auto last = std::unique(result.begin(), result.end());
+  // remove undefined values
+  result.erase(last, result.end());
+
+  return result;
+}
+
+
+template <typename N, typename E>
+std::vector<E> Graph<N,E>::GetWeights(const N& src, const N& dst) const {
+	if (!IsNode(src) || !IsNode(dst)) {
+	  throw std::out_of_range(
+	  "Cannot call Graph::GetWeights if src or dst node don't exist in the graph");
+	}
+
+	vector<E> result;
+	for (const auto& edge : edges_) {
+	  if (*(edge.src_ptr_) == src && *(edge.dst_ptr_) == dst) {
+		const E copy_weight = *(edge.weight_ptr_);
+		result.push_back(copy_weight);
+	  }
+	}
+
+	return result;
+}
+
+template <typename N, typename E>
+bool Graph<N,E>::erase(const N& src, const N& dst, const E& w) {
+	const auto src_iter = std::find(nodes_.cbegin(), nodes_.cend(), Node{src});
+	const auto dst_iter = std::find(nodes_.cbegin(), nodes_.cend(), Node{dst});
+	if (src_iter == nodes_.end() || dst_iter == nodes_.end()) {
+	  return false;
+	} // else
+
+	const Edge tmp{(*src_iter).node_ptr_, (*dst_iter).node_ptr_, w};
+	auto it = std::find(edges_.cbegin(), edges_.cend(), tmp);
+	if (it == edges_.end()) {
+	  return false;
+	} // else
+
+	edges_.erase(it);
+	std::sort(edges_.begin(), edges_.end());
+	return true;
+}
+
+/*
+reference operator*() const;
+Rope::iterator::reference Rope::iterator::operator*() const {
+  return *inner_;
+}
+
+const_iterator(const typename vector<Edge>::const_iterator& it) : it_{it}
+Graph<N,E>::const_iterator::
 */
+//Rope::iterator::reference Rope::iterator::operator*()
+template <typename N, typename E>
+typename Graph<N,E>::const_iterator::reference Graph<N,E>::const_iterator::operator*() const {
+	 const N& node1 = *((*it_).src_ptr_);
+	 const N& node2 = *((*it_).dst_ptr_);
+	 const E& edge_w = *((*it_).weight_ptr_);
+	 return {node1, node2, edge_w};
+}
+
+template <typename N, typename E>
+//Rope::iterator& Rope::iterator::operator++()
+typename Graph<N,E>::const_iterator& Graph<N,E>::const_iterator::operator++() {
+	++it_;
+    return *this;
+}
+
+//const_iterator operator++(int);
+template <typename N, typename E>
+typename Graph<N,E>::const_iterator Graph<N,E>::const_iterator::operator++(int) {
+	auto copy{*this};
+    ++(*this);
+    return copy;
+}
+
+template <typename N, typename E>
+typename Graph<N,E>::const_iterator& Graph<N,E>::const_iterator::operator--() {
+	--it_;
+    return *this;
+}
+
+template <typename N, typename E>
+typename Graph<N,E>::const_iterator Graph<N,E>::const_iterator::operator--(int) {
+	auto copy{*this};
+    --(*this);
+    return copy;
+}
+
+template <typename N, typename E>
+typename Graph<N,E>::const_iterator Graph<N,E>::find(const N& src, const N& dst, const E& w) const {
+     const auto it = std::find_if(edges_.cbegin(), edges_.cend(),
+       [&](const Edge& edge){
+         return *(edge.src_ptr_) == src && *(edge.dst_ptr_) == dst &&
+                *(edge.weight_ptr_) == w;
+       }
+     );
+
+     if (it != edges_.end()) {
+       return const_iterator{it};
+     } // else
+     return cend();
+}
+
+
+template <typename N, typename E>
+typename Graph<N,E>::const_iterator Graph<N,E>::erase(const_iterator it){
+	const auto iter = edges_.erase(it.it_);
+	     if (iter != edges_.end()) {
+	       return const_iterator{iter};
+	     } // else
+	     return end();
+}
+
+

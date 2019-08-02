@@ -7,8 +7,6 @@
    and why you think your tests are that thorough.
 
 
-
-
 */
 
 #include "assignments/dg/graph.h"
@@ -362,6 +360,142 @@ SCENARIO("Replace node - replace new element with old element") {
 }
 
 
+SCENARIO("Replace() correctness & coverage") {
+  GIVEN("A sample graph") {
+		gdwg::Graph<std::string, int> g;
+		  //inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+		g.InsertNode("adelaide");
+		g.InsertNode("perth");
+		g.InsertNode("darwin");
+		g.InsertNode("hobart");
+
+		  //inserting edges
+		g.InsertEdge("sydney", "melbourne", 42);
+		g.InsertEdge("sydney", "brisbane", 42);
+		g.InsertEdge("sydney", "perth", 42);
+		g.InsertEdge("sydney", "darwin", 42);
+		g.InsertEdge("sydney", "hobart", 42);
+
+		WHEN("Replace old node with new node") {
+		REQUIRE(g.Replace("sydney","hongkong")==true);
+    	auto nodes = g.GetConnected("hongkong");
+		  THEN("That edge should be in the graph") {
+				REQUIRE(nodes[0]=="brisbane");
+				REQUIRE(nodes[1]=="darwin");
+				REQUIRE(nodes[2]=="hobart");
+				REQUIRE(nodes[3]=="melbourne");
+				REQUIRE(nodes[4]=="perth");
+				REQUIRE(g.IsConnected("hongkong","melbourne"));
+				REQUIRE(g.IsConnected("hongkong","brisbane"));
+				REQUIRE(g.IsConnected("hongkong","perth"));
+				REQUIRE(g.IsConnected("hongkong","darwin"));
+				REQUIRE(g.IsConnected("hongkong","hobart"));
+		  }
+    }
+  }
+
+  GIVEN("A sample graph") {
+		gdwg::Graph<std::string, int> g;
+		  //inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+		g.InsertNode("adelaide");
+		g.InsertNode("perth");
+		g.InsertNode("darwin");
+		g.InsertNode("hobart");
+
+		  //inserting edges
+		g.InsertEdge("sydney", "melbourne", 42);
+		g.InsertEdge("sydney", "brisbane", 42);
+		g.InsertEdge("sydney", "perth", 42);
+		g.InsertEdge("sydney", "darwin", 42);
+		g.InsertEdge("sydney", "hobart", 42);
+
+		WHEN("Replace node which the new node name already exist in the graph") {
+		  THEN("That edge should be in the graph") {
+			  REQUIRE(g.Replace("sydney","melbourne")==false);
+		  }
+		}
+
+  }
+}
+
+
+SCENARIO("MergeReplace() correctness & coverage") {
+	GIVEN("A graph containing existing elements - merge replace true case") {
+		gdwg::Graph<std::string, int> g;
+		  //inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+		g.InsertNode("adelaide");
+		g.InsertNode("perth");
+		g.InsertNode("darwin");
+		g.InsertNode("hobart");
+		g.InsertNode("shanghai");
+
+		  //inserting edges
+		g.InsertEdge("sydney", "melbourne", 42);
+		g.InsertEdge("sydney", "brisbane", 42);
+		g.InsertEdge("sydney", "perth", 42);
+		g.InsertEdge("sydney", "darwin", 42);
+		g.InsertEdge("sydney", "hobart", 42);
+		g.InsertEdge("sydney", "shanghai", 42);
+
+		g.MergeReplace("sydney","shanghai");
+
+		WHEN("Replace old node with new node") {
+		    	auto nodes = g.GetConnected("shanghai");
+				  THEN("That edge should be in the graph") {
+					REQUIRE(nodes[0]=="brisbane");
+					REQUIRE(nodes[1]=="darwin");
+					REQUIRE(nodes[2]=="hobart");
+					REQUIRE(nodes[3]=="melbourne");
+					REQUIRE(nodes[4]=="perth");
+					REQUIRE(nodes[5]=="shanghai");
+					REQUIRE(g.IsConnected("shanghai","melbourne"));
+					REQUIRE(g.IsConnected("shanghai","brisbane"));
+					REQUIRE(g.IsConnected("shanghai","perth"));
+					REQUIRE(g.IsConnected("shanghai","darwin"));
+					REQUIRE(g.IsConnected("shanghai","hobart"));
+					REQUIRE(g.IsConnected("shanghai","shanghai"));
+				  }
+			}
+	}
+
+
+
+	GIVEN("A graph containing existing elements - merge replace false case") {
+		gdwg::Graph<std::string, int> g;
+		  //inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+		g.InsertNode("adelaide");
+		g.InsertNode("perth");
+		g.InsertNode("darwin");
+		g.InsertNode("hobart");
+
+		  //inserting edges
+		g.InsertEdge("sydney", "melbourne", 42);
+		g.InsertEdge("sydney", "brisbane", 42);
+		g.InsertEdge("sydney", "perth", 42);
+		g.InsertEdge("sydney", "darwin", 42);
+		g.InsertEdge("sydney", "hobart", 42);
+
+		WHEN("Replace nodes") {
+		  THEN("Should catch exception") {
+			  	  REQUIRE_THROWS_WITH(g.MergeReplace("sydney","shanghai"),"Cannot call Graph::MergeReplace on old or new data if they don't exist in the graph");
+		  	  }
+		}
+	}
+}
+
+
 SCENARIO("Inserting an edge that is already in the graph") {
   GIVEN("A graph with an edge in it") {
   	const auto edge = std::make_tuple("Hello", "There!", 5.4);
@@ -477,13 +611,194 @@ SCENARIO("GetConnected() correctness & coverage test") {
 		g.InsertEdge("sydney", "hobart", 42);
 
 		auto nodes = g.GetConnected("sydney");
-		THEN("Elements should be identifiable in the return vector") {
+		THEN("Elements should be added and it is added in the correct order") {
 			REQUIRE(std::find(nodes.begin(), nodes.end(), "melbourne") != nodes.end());
 			REQUIRE(std::find(nodes.begin(), nodes.end(), "brisbane") != nodes.end());
 			REQUIRE(std::find(nodes.begin(), nodes.end(), "perth") != nodes.end());
 			REQUIRE(std::find(nodes.begin(), nodes.end(), "darwin") != nodes.end());
 			REQUIRE(std::find(nodes.begin(), nodes.end(), "hobart") != nodes.end());
+			REQUIRE(std::find(nodes.begin(), nodes.end(), "adelaide") == nodes.end());
+			REQUIRE(nodes[0]=="brisbane");
+			REQUIRE(nodes[1]=="darwin");
+			REQUIRE(nodes[2]=="hobart");
+			REQUIRE(nodes[3]=="melbourne");
+			REQUIRE(nodes[4]=="perth");
+		}
+	}
+
+	WHEN("A graph contains nothing and get nodes") {
+		gdwg::Graph<std::string, int> g;
+		THEN("Nothing should be there") {
+			REQUIRE_THROWS_WITH(g.GetConnected("sydney"),"Cannot call Graph::GetConnected if src doesn't exist in the graph");
+		}
+	}
+
+	WHEN("A graph contains something and GetConnected() is called and source is not in the graph") {
+			gdwg::Graph<std::string, int> g;
+			//inserting ndoes
+			g.InsertNode("sydney");
+			g.InsertNode("melbourne");
+			g.InsertNode("brisbane");
+			g.InsertNode("adelaide");
+			g.InsertNode("perth");
+			g.InsertNode("darwin");
+			g.InsertNode("hobart");
+
+			//inserting edges
+			g.InsertEdge("sydney", "melbourne", 42);
+			g.InsertEdge("sydney", "brisbane", 42);
+			g.InsertEdge("sydney", "perth", 42);
+			g.InsertEdge("sydney", "darwin", 42);
+			g.InsertEdge("sydney", "hobart", 42);
+
+			THEN("Elements should be added and it is added in the correct order") {
+				REQUIRE_THROWS_WITH(g.GetConnected("kensington"),"Cannot call Graph::GetConnected if src doesn't exist in the graph");
+			}
+		}
+
+}
+
+SCENARIO("GetWeight() correctness & coverage test") {
+
+	WHEN("A graph contains something and GetConnected() is called - inserted random order") {
+		gdwg::Graph<std::string, int> g;
+		//inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+		g.InsertNode("adelaide");
+		g.InsertNode("perth");
+		g.InsertNode("darwin");
+		g.InsertNode("hobart");
+
+		//inserting edges
+		g.InsertEdge("sydney", "melbourne", 43);
+		g.InsertEdge("sydney", "melbourne", 42);
+		g.InsertEdge("sydney", "melbourne", 45);
+		g.InsertEdge("sydney", "brisbane", 42);
+		g.InsertEdge("sydney", "perth", 42);
+		g.InsertEdge("sydney", "darwin", 42);
+		g.InsertEdge("sydney", "hobart", 42);
+
+		auto weight = g.GetWeights("sydney","melbourne");
+		THEN("Elements should be added and it is added in the correct order") {
+			REQUIRE(weight[0]==42);
+			REQUIRE(weight[1]==43);
+			REQUIRE(weight[2]==45);
+		}
+	}
+
+	WHEN("Getting an edge not in the graph - source") {
+			gdwg::Graph<std::string, int> g;
+			  //inserting ndoes
+			g.InsertNode("sydney");
+			g.InsertNode("melbourne");
+			g.InsertNode("brisbane");
+			g.InsertNode("adelaide");
+			g.InsertNode("perth");
+			g.InsertNode("darwin");
+			g.InsertNode("hobart");
+
+			  //inserting edges
+			g.InsertEdge("sydney", "melbourne", 43);
+			g.InsertEdge("sydney", "melbourne", 42);
+			g.InsertEdge("sydney", "melbourne", 45);
+			g.InsertEdge("sydney", "brisbane", 42);
+			g.InsertEdge("sydney", "perth", 42);
+			g.InsertEdge("sydney", "darwin", 42);
+			g.InsertEdge("sydney", "hobart", 42);
+
+			THEN("Should throw exception") {
+				REQUIRE_THROWS_WITH(g.GetWeights("kensington","melbourne"),"Cannot call Graph::GetWeights if src or dst node don't exist in the graph");
+			}
+	}
+
+	WHEN("Getting an edge not in the graph - destination") {
+			gdwg::Graph<std::string, int> g;
+			  //inserting ndoes
+			g.InsertNode("sydney");
+			g.InsertNode("melbourne");
+			g.InsertNode("brisbane");
+			g.InsertNode("adelaide");
+			g.InsertNode("perth");
+			g.InsertNode("darwin");
+			g.InsertNode("hobart");
+
+			  //inserting edges
+			g.InsertEdge("sydney", "melbourne", 43);
+			g.InsertEdge("sydney", "melbourne", 42);
+			g.InsertEdge("sydney", "melbourne", 45);
+			g.InsertEdge("sydney", "brisbane", 42);
+			g.InsertEdge("sydney", "perth", 42);
+			g.InsertEdge("sydney", "darwin", 42);
+			g.InsertEdge("sydney", "hobart", 42);
+
+			THEN("Should throw exception") {
+				REQUIRE_THROWS_WITH(g.GetWeights("sydney","kensington"),"Cannot call Graph::GetWeights if src or dst node don't exist in the graph");
+			}
+	}
+}
+
+SCENARIO("const_iterator find correctness & coverage ") {
+	WHEN("Find an edge in a graph - true case") {
+		gdwg::Graph<std::string, int> g;
+		//inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+		g.InsertNode("adelaide");
+		g.InsertNode("perth");
+		g.InsertNode("darwin");
+		g.InsertNode("hobart");
+
+		//inserting edges
+		g.InsertEdge("sydney", "melbourne", 43);
+		g.InsertEdge("sydney", "melbourne", 42);
+		g.InsertEdge("sydney", "melbourne", 45);
+		g.InsertEdge("sydney", "brisbane", 42);
+		g.InsertEdge("sydney", "perth", 42);
+		g.InsertEdge("sydney", "darwin", 42);
+		g.InsertEdge("sydney", "hobart", 42);
+
+		auto it = g.find("sydney", "melbourne", 43);
+		auto not_found = g.cend();
+		THEN("it should not be end") {
+			REQUIRE(it!=not_found);
 		}
 	}
 }
+
+SCENARIO("clear() find correctness & coverage ") {
+	GIVEN ("There is a simple graph") {
+		gdwg::Graph<std::string, int> g;
+		//inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+		g.InsertNode("adelaide");
+		g.InsertNode("perth");
+		g.InsertNode("darwin");
+		g.InsertNode("hobart");
+
+		//inserting edges
+		g.InsertEdge("sydney", "melbourne", 43);
+		g.InsertEdge("sydney", "melbourne", 42);
+		g.InsertEdge("sydney", "melbourne", 45);
+		g.InsertEdge("sydney", "brisbane", 42);
+		g.InsertEdge("sydney", "perth", 42);
+		g.InsertEdge("sydney", "darwin", 42);
+		g.InsertEdge("sydney", "hobart", 42);
+
+		WHEN("Clear is called") {
+				g.Clear();
+				THEN("Edges and nodes should be cleared") {
+					auto nodes = g.GetNodes();
+					REQUIRE(nodes.size()==0);
+				}
+		}
+	}
+}
+
+
+
 

@@ -6,7 +6,9 @@
    to which you're certain you have covered all possibilities,
    and why you think your tests are that thorough.
 
-
+Basically, all the testable constructors / methods were covered.
+All the tests were tested with 2 cases: a general case and an exceptional case.
+General cases should match the expected output, and exceptional cases should be able throw with the expected exception.
 */
 
 #include "assignments/dg/graph.h"
@@ -726,8 +728,6 @@ SCENARIO("GetWeight() correctness & coverage test") {
 
 			  //inserting edges
 			g.InsertEdge("sydney", "melbourne", 43);
-			g.InsertEdge("sydney", "melbourne", 42);
-			g.InsertEdge("sydney", "melbourne", 45);
 			g.InsertEdge("sydney", "brisbane", 42);
 			g.InsertEdge("sydney", "perth", 42);
 			g.InsertEdge("sydney", "darwin", 42);
@@ -753,8 +753,6 @@ SCENARIO("const_iterator find correctness & coverage ") {
 
 		//inserting edges
 		g.InsertEdge("sydney", "melbourne", 43);
-		g.InsertEdge("sydney", "melbourne", 42);
-		g.InsertEdge("sydney", "melbourne", 45);
 		g.InsertEdge("sydney", "brisbane", 42);
 		g.InsertEdge("sydney", "perth", 42);
 		g.InsertEdge("sydney", "darwin", 42);
@@ -767,6 +765,75 @@ SCENARIO("const_iterator find correctness & coverage ") {
 		}
 	}
 }
+
+
+SCENARIO("erase correctness & coverage ") {
+
+	GIVEN ("A graph containing nodes and edges - true case") {
+			gdwg::Graph<std::string, int> g;
+			//inserting ndoes
+			g.InsertNode("sydney");
+			g.InsertNode("melbourne");
+			g.InsertNode("brisbane");
+
+			//inserting edges
+			g.InsertEdge("sydney", "melbourne", 42);
+			g.InsertEdge("sydney", "brisbane", 42);
+
+			WHEN("Removing an edge") {
+					REQUIRE(g.erase("sydney","melbourne",42)==true);
+					auto nodes = g.GetConnected("sydney");
+					THEN("There should be only 2 edges after removing the first one") {
+						REQUIRE(std::find(nodes.begin(), nodes.end(), "melbourne") == nodes.end());
+						REQUIRE(std::find(nodes.begin(), nodes.end(), "brisbane") != nodes.end());
+					}
+			}
+	}
+
+
+	GIVEN ("A graph containing nodes and edges - false case") {
+			gdwg::Graph<std::string, int> g;
+			//inserting ndoes
+			g.InsertNode("sydney");
+			g.InsertNode("melbourne");
+			g.InsertNode("brisbane");
+
+			//inserting edges
+			g.InsertEdge("sydney", "melbourne", 42);
+			g.InsertEdge("sydney", "brisbane", 42);
+
+			WHEN("Removing 2 edges twice") {
+					THEN("Should not be able to remove") {
+						REQUIRE(g.erase("sydney","melbourne",42)==true);
+						REQUIRE(g.erase("sydney","melbourne",42)==false);
+					}
+			}
+	}
+
+	GIVEN ("A graph containing nodes and edges - removing one edge") {
+		gdwg::Graph<std::string, int> g;
+		//inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+
+		//inserting edges
+		g.InsertEdge("sydney", "melbourne", 43);
+		g.InsertEdge("sydney", "melbourne", 90);
+		g.InsertEdge("sydney", "brisbane", 42);
+
+		WHEN("Deleting one edge") {
+				g.erase("sydney","melbourne",42);
+				auto nodes = g.GetConnected("sydney");
+				THEN("There should be only 2 edges after removing the first one") {
+					auto nodes = g.GetConnected("sydney");
+					REQUIRE(std::find(nodes.begin(), nodes.end(), "melbourne") != nodes.end());
+					REQUIRE(std::find(nodes.begin(), nodes.end(), "brisbane") != nodes.end());
+				}
+		}
+	}
+}
+
 
 SCENARIO("clear() find correctness & coverage ") {
 	GIVEN ("There is a simple graph") {
@@ -800,5 +867,125 @@ SCENARIO("clear() find correctness & coverage ") {
 }
 
 
+SCENARIO("const_iterator erase true case") {
+	GIVEN ("There is a simple graph") {
+		gdwg::Graph<std::string, int> g;
+		//inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+		g.InsertNode("adelaide");
+		g.InsertNode("perth");
+		g.InsertNode("darwin");
+		g.InsertNode("hobart");
 
+		//inserting edges
+		g.InsertEdge("sydney", "melbourne", 43);
+		g.InsertEdge("sydney", "brisbane", 42);
+		g.InsertEdge("sydney", "perth", 42);
+		g.InsertEdge("sydney", "darwin", 42);
+		g.InsertEdge("sydney", "hobart", 42);
+
+		WHEN("Const iterator is called") {
+				auto it = g.find("sydney", "melbourne", 43);
+				THEN("The edge should be deleted") {
+					if (it != g.end()) {
+					  g.erase(it);
+					}
+					REQUIRE(g.IsConnected("sydney","melbourne")==false);
+				}
+		}
+	}
+}
+
+SCENARIO("friend equal true case") {
+	GIVEN ("There is a simple graph") {
+		gdwg::Graph<std::string, int> g;
+		//inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+		g.InsertNode("adelaide");
+		g.InsertNode("perth");
+		g.InsertNode("darwin");
+		g.InsertNode("hobart");
+
+		//inserting edges
+		g.InsertEdge("sydney", "melbourne", 43);
+		g.InsertEdge("sydney", "brisbane", 42);
+		g.InsertEdge("sydney", "perth", 42);
+		g.InsertEdge("sydney", "darwin", 42);
+		g.InsertEdge("sydney", "hobart", 42);
+
+		//copy a graph
+		gdwg::Graph<std::string, int> copy{g};
+
+		WHEN("== is checked") {
+				THEN("Should be equal") {
+					REQUIRE(g==copy);
+				}
+		}
+	}
+}
+
+SCENARIO("friend not equal true case") {
+	GIVEN ("There is a simple graph") {
+		gdwg::Graph<std::string, int> g;
+		//inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+		g.InsertNode("adelaide");
+		g.InsertNode("perth");
+		g.InsertNode("darwin");
+		g.InsertNode("hobart");
+
+		//inserting edges
+		g.InsertEdge("sydney", "melbourne", 43);
+		g.InsertEdge("sydney", "brisbane", 42);
+		g.InsertEdge("sydney", "perth", 42);
+		g.InsertEdge("sydney", "darwin", 42);
+		g.InsertEdge("sydney", "hobart", 42);
+
+		//copy a graph
+		gdwg::Graph<std::string, int> copy{g};
+		copy.InsertNode("penrith");
+		copy.InsertEdge("sydney", "penrith", 43);
+
+		WHEN("== is checked") {
+				THEN("Should not be equal") {
+					REQUIRE(g!=copy);
+				}
+		}
+	}
+}
+
+SCENARIO("Outputstream test") {
+	GIVEN ("There is a simple graph") {
+		gdwg::Graph<std::string, int> g;
+		//inserting ndoes
+		g.InsertNode("sydney");
+		g.InsertNode("melbourne");
+		g.InsertNode("brisbane");
+		g.InsertNode("adelaide");
+		g.InsertNode("perth");
+		g.InsertNode("darwin");
+		g.InsertNode("hobart");
+
+		//inserting edges
+		g.InsertEdge("sydney", "melbourne", 43);
+		g.InsertEdge("sydney", "brisbane", 42);
+		g.InsertEdge("sydney", "perth", 42);
+		g.InsertEdge("sydney", "darwin", 42);
+		g.InsertEdge("sydney", "hobart", 42);
+		g.InsertEdge("hobart", "sydney", 42);
+
+		WHEN("Printing the graph") {
+			std::cout << g << std::endl;
+				THEN("Should not be equal") {
+
+				}
+		}
+	}
+}
 

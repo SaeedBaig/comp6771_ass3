@@ -54,10 +54,9 @@ Graph<N, E>::Graph(Graph&& other) : nodes_{std::move(other.nodes_)}, edges_{std:
 
 template <typename N, typename E>
 Graph<N, E>& Graph<N,E>::operator=(const Graph<N, E>& other) {
-  	  nodes_.clear();
-  	  edges_.clear();
+  	Clear();
 
-  	  // copy their nodes
+  	// copy their nodes
     for (const auto& node : other.nodes_) {
       InsertNode(*(node.node_ptr_));
     }
@@ -346,5 +345,3 @@ typename Graph<N,E>::const_iterator Graph<N,E>::erase(const_iterator it){
 	     } // else
 	     return end();
 }
-
-

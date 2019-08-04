@@ -49,15 +49,19 @@ Graph<N, E>::Graph(const Graph& other) {
 
 template <typename N, typename E>
 Graph<N, E>& Graph<N,E>::operator=(const Graph<N, E>& other) {
-	nodes_=graph.nodes_;
+  Clear();
 
-  for(auto e: graph.edges_) {
-	  Edge copy_edge{*e->from_,*e->to_,*e->weight_};
-	  edges_.push_back(std::make_shared<Edge>(copy_edge));
-	  //TODO: add redundant check
-	  nodes_.push_back(std::make_shared<Node>(*e->from_));
-	  nodes_.push_back(std::make_shared<Node>(*e->to_));
+  // copy their nodes
+  for (const auto& node : other.nodes_) {
+    InsertNode(*(node.node_ptr_));
   }
+
+  // copy their edges
+  for (const auto& edge : other.edges_) {
+    InsertEdge(*(edge.src_ptr_), *(edge.dst_ptr_), *(edge.weight_ptr_));
+  }
+  std::sort(edges_.begin(), edges_.end());
+
   return *this;
 }
 
@@ -262,5 +266,3 @@ bool Graph<N,E>::erase(const N& src, const N& dst, const E& w) {
 	std::sort(edges_.begin(), edges_.end());
 	return true;
 }
-
-

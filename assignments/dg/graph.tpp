@@ -93,7 +93,9 @@ Graph<N, E>& Graph<N,E>::operator=(Graph<N, E>&& other) {
 
 template <typename N, typename E>
 bool Graph<N,E>::IsNode(const N& val) const {
-	return std::find(nodes_.cbegin(), nodes_.cend(), Node{val}) != nodes_.end();
+  return std::any_of(nodes_.cbegin(), nodes_.cend(), [&](const Node& node) {
+    return *(node.node_ptr_) == val;
+  });
 }
 
 template <typename N, typename E>

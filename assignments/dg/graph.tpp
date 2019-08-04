@@ -5,6 +5,9 @@ using namespace gdwg;
 
 template <typename N, typename E>
 Graph<N, E>::Graph(typename std::vector<N>::const_iterator start, typename std::vector<N>::const_iterator end) {
+  const auto num_nodes = std::distance(start, end);
+  nodes_.reserve(num_nodes);
+
 	for (auto it = start; it != end; ++it) {
 	      InsertNode(*it);
 	}
@@ -13,6 +16,10 @@ Graph<N, E>::Graph(typename std::vector<N>::const_iterator start, typename std::
 template <typename N, typename E>
 Graph<N, E>::Graph(typename std::vector<std::tuple<N, N, E>>::const_iterator start,
     typename std::vector<std::tuple<N, N, E>>::const_iterator end) {
+    const auto num_edges = std::distance(start, end);
+    edges_.reserve(num_edges);
+    nodes_.reserve(num_edges);  // #nodes may be > #edges, but this is just a rough approximation
+
 		for (auto it = start; it != end; ++it) {
 		  const N& src = std::get<0>(*it);
 		  const N& dst = std::get<1>(*it);
@@ -27,6 +34,7 @@ Graph<N, E>::Graph(typename std::vector<std::tuple<N, N, E>>::const_iterator sta
 
 template <typename N, typename E>
 Graph<N, E>::Graph(typename std::initializer_list<N> list) {
+    nodes_.reserve(list.size());
 	  for(const N& element:list) {
 		  InsertNode(element);
 	  }
@@ -35,11 +43,13 @@ Graph<N, E>::Graph(typename std::initializer_list<N> list) {
 template <typename N, typename E>
 Graph<N, E>::Graph(const Graph& other) {
     // copy their nodes
+    nodes_.reserve(other.nodes_.size());
     for (const auto& node : other.nodes_) {
       InsertNode(*(node.node_ptr_));
     }
 
     // copy their edges
+    edges_.reserve(other.edges_.size());
     for (const auto& edge : other.edges_) {
       InsertEdge(*(edge.src_ptr_), *(edge.dst_ptr_), *(edge.weight_ptr_));
     }
@@ -57,14 +67,17 @@ Graph<N, E>& Graph<N,E>::operator=(const Graph<N, E>& other) {
   	Clear();
 
   	// copy their nodes
+    nodes_.reserve(other.nodes_.size());
     for (const auto& node : other.nodes_) {
       InsertNode(*(node.node_ptr_));
     }
 
     // copy their edges
+    edges_.reserve(other.edges_.size());
     for (const auto& edge : other.edges_) {
       InsertEdge(*(edge.src_ptr_), *(edge.dst_ptr_), *(edge.weight_ptr_));
     }
+
     std::sort(edges_.begin(), edges_.end());
 
     return *this;
@@ -204,10 +217,12 @@ void Graph<N,E>::Clear() {
 template <typename N, typename E>
 std::vector<N> Graph<N,E>::GetNodes() const {
     std::vector<N> result;
+    result.reserve(nodes_.size());
+
     for (const auto& node : nodes_) {
-      const N copy_val = *(node.node_ptr_);
-      result.push_back(copy_val);
+      result.push_back(*(node.node_ptr_));
     }
+
     std::sort(result.begin(), result.end());
     return result;
 }
@@ -220,10 +235,11 @@ std::vector<N> Graph<N,E>::GetConnected(const N& src) const {
   }
 
   std::vector<N> result;
+  result.reserve(edges_.size());
+
   for (const auto& edge : edges_) {
     if (*(edge.src_ptr_) == src) {
-      const N copy_val = *(edge.dst_ptr_);
-      result.push_back(copy_val);
+      result.push_back(*(edge.dst_ptr_));
     }
   }
 
@@ -246,10 +262,11 @@ std::vector<E> Graph<N,E>::GetWeights(const N& src, const N& dst) const {
 	}
 
 	vector<E> result;
+  result.reserve(edges_.size());
+
 	for (const auto& edge : edges_) {
 	  if (*(edge.src_ptr_) == src && *(edge.dst_ptr_) == dst) {
-		const E copy_weight = *(edge.weight_ptr_);
-		result.push_back(copy_weight);
+      result.push_back(*(edge.weight_ptr_));
 	  }
 	}
 

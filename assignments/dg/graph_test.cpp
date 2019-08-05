@@ -13,6 +13,7 @@ General cases should match the expected output, and exceptional cases should be 
 
 #include "assignments/dg/graph.h"
 #include "catch.h"
+#include <sstream>
 
 
 SCENARIO("Default constructor test") {
@@ -153,7 +154,7 @@ SCENARIO("Move assignment test") {
 		std::vector<std::string> v{"Hello", "how", "are", "you"};
 		gdwg::Graph<std::string, double> graph{v.begin(),v.end()};
 		gdwg::Graph<std::string, double> empty;
-		empty = std::move(graph);;
+		empty = std::move(graph);
 		THEN("There should be no segmentation fault") {
 
 			REQUIRE(graph.IsNode("Hello")==false);
@@ -306,7 +307,7 @@ SCENARIO("Delete nodes - typical & exceptional cases") {
 
   GIVEN("Graph with existing nodes and edges - true-case testing") {
       gdwg::Graph<std::string, int> g;
-      //inserting ndoes
+      //inserting nodes
       g.InsertNode("sydney");
       g.InsertNode("melbourne");
       g.InsertNode("brisbane");
@@ -365,7 +366,7 @@ SCENARIO("Replace node - replace new element with old element") {
 SCENARIO("Replace() correctness & coverage") {
   GIVEN("A sample graph") {
 		gdwg::Graph<std::string, int> g;
-		  //inserting ndoes
+		  //inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -401,7 +402,7 @@ SCENARIO("Replace() correctness & coverage") {
 
   GIVEN("A sample graph") {
 		gdwg::Graph<std::string, int> g;
-		  //inserting ndoes
+		  //inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -430,7 +431,7 @@ SCENARIO("Replace() correctness & coverage") {
 SCENARIO("MergeReplace() correctness & coverage") {
 	GIVEN("A graph containing existing elements - merge replace true case") {
 		gdwg::Graph<std::string, int> g;
-		  //inserting ndoes
+		  //inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -473,7 +474,7 @@ SCENARIO("MergeReplace() correctness & coverage") {
 
 	GIVEN("A graph containing existing elements - merge replace false case") {
 		gdwg::Graph<std::string, int> g;
-		  //inserting ndoes
+		  //inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -596,7 +597,7 @@ SCENARIO("GetConnected() correctness & coverage test") {
 
 	WHEN("A graph contains something and GetConnected() is called") {
 		gdwg::Graph<std::string, int> g;
-		  //inserting ndoes
+		  //inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -637,7 +638,7 @@ SCENARIO("GetConnected() correctness & coverage test") {
 
 	WHEN("A graph contains something and GetConnected() is called and source is not in the graph") {
 			gdwg::Graph<std::string, int> g;
-			//inserting ndoes
+			//inserting nodes
 			g.InsertNode("sydney");
 			g.InsertNode("melbourne");
 			g.InsertNode("brisbane");
@@ -664,7 +665,7 @@ SCENARIO("GetWeight() correctness & coverage test") {
 
 	WHEN("A graph contains something and GetConnected() is called - inserted random order") {
 		gdwg::Graph<std::string, int> g;
-		//inserting ndoes
+		//inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -692,7 +693,7 @@ SCENARIO("GetWeight() correctness & coverage test") {
 
 	WHEN("Getting an edge not in the graph - source") {
 			gdwg::Graph<std::string, int> g;
-			  //inserting ndoes
+			  //inserting nodes
 			g.InsertNode("sydney");
 			g.InsertNode("melbourne");
 			g.InsertNode("brisbane");
@@ -717,7 +718,7 @@ SCENARIO("GetWeight() correctness & coverage test") {
 
 	WHEN("Getting an edge not in the graph - destination") {
 			gdwg::Graph<std::string, int> g;
-			  //inserting ndoes
+			  //inserting nodes
 			g.InsertNode("sydney");
 			g.InsertNode("melbourne");
 			g.InsertNode("brisbane");
@@ -742,7 +743,7 @@ SCENARIO("GetWeight() correctness & coverage test") {
 SCENARIO("const_iterator find correctness & coverage ") {
 	WHEN("Find an edge in a graph - true case") {
 		gdwg::Graph<std::string, int> g;
-		//inserting ndoes
+		//inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -759,9 +760,12 @@ SCENARIO("const_iterator find correctness & coverage ") {
 		g.InsertEdge("sydney", "hobart", 42);
 
 		auto it = g.find("sydney", "melbourne", 43);
-		auto not_found = g.cend();
+		const auto not_found = g.cend();
 		THEN("it should not be end") {
-			REQUIRE(it!=not_found);
+			REQUIRE(it != not_found);
+      REQUIRE(std::get<0>(*it) == "sydney");
+      REQUIRE(std::get<1>(*it) == "melbourne");
+      REQUIRE(std::get<2>(*it) == 43);
 		}
 	}
 }
@@ -771,7 +775,7 @@ SCENARIO("erase correctness & coverage ") {
 
 	GIVEN ("A graph containing nodes and edges - true case") {
 			gdwg::Graph<std::string, int> g;
-			//inserting ndoes
+			//inserting nodes
 			g.InsertNode("sydney");
 			g.InsertNode("melbourne");
 			g.InsertNode("brisbane");
@@ -793,7 +797,7 @@ SCENARIO("erase correctness & coverage ") {
 
 	GIVEN ("A graph containing nodes and edges - false case") {
 			gdwg::Graph<std::string, int> g;
-			//inserting ndoes
+			//inserting nodes
 			g.InsertNode("sydney");
 			g.InsertNode("melbourne");
 			g.InsertNode("brisbane");
@@ -812,7 +816,7 @@ SCENARIO("erase correctness & coverage ") {
 
 	GIVEN ("A graph containing nodes and edges - removing one edge") {
 		gdwg::Graph<std::string, int> g;
-		//inserting ndoes
+		//inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -838,7 +842,7 @@ SCENARIO("erase correctness & coverage ") {
 SCENARIO("clear() find correctness & coverage ") {
 	GIVEN ("There is a simple graph") {
 		gdwg::Graph<std::string, int> g;
-		//inserting ndoes
+		//inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -870,7 +874,7 @@ SCENARIO("clear() find correctness & coverage ") {
 SCENARIO("const_iterator erase true case") {
 	GIVEN ("There is a simple graph") {
 		gdwg::Graph<std::string, int> g;
-		//inserting ndoes
+		//inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -901,7 +905,7 @@ SCENARIO("const_iterator erase true case") {
 SCENARIO("friend equal true case") {
 	GIVEN ("There is a simple graph") {
 		gdwg::Graph<std::string, int> g;
-		//inserting ndoes
+		//inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -931,7 +935,7 @@ SCENARIO("friend equal true case") {
 SCENARIO("friend not equal true case") {
 	GIVEN ("There is a simple graph") {
 		gdwg::Graph<std::string, int> g;
-		//inserting ndoes
+		//inserting nodes
 		g.InsertNode("sydney");
 		g.InsertNode("melbourne");
 		g.InsertNode("brisbane");
@@ -961,31 +965,54 @@ SCENARIO("friend not equal true case") {
 }
 
 SCENARIO("Outputstream test") {
-	GIVEN ("There is a simple graph") {
-		gdwg::Graph<std::string, int> g;
-		//inserting ndoes
-		g.InsertNode("sydney");
-		g.InsertNode("melbourne");
-		g.InsertNode("brisbane");
-		g.InsertNode("adelaide");
-		g.InsertNode("perth");
-		g.InsertNode("darwin");
-		g.InsertNode("hobart");
-
-		//inserting edges
-		g.InsertEdge("sydney", "melbourne", 43);
-		g.InsertEdge("sydney", "brisbane", 42);
-		g.InsertEdge("sydney", "perth", 42);
-		g.InsertEdge("sydney", "darwin", 42);
-		g.InsertEdge("sydney", "hobart", 42);
-		g.InsertEdge("hobart", "sydney", 42);
+	GIVEN ("A graph") {
+		gdwg::Graph<int, int> g{1, 2, 3, 4, 5, 6};
+    g.InsertEdge(1, 5, -1);
+    g.InsertEdge(2, 1, 1);
+    g.InsertEdge(2, 4, 2);
+    g.InsertEdge(3, 2, 2);
+    g.InsertEdge(3, 6, -8);
+    g.InsertEdge(4, 1, -4);
+    g.InsertEdge(4, 5, 3);
+    g.InsertEdge(5, 2, 7);
+    g.InsertEdge(6, 2, 5);
+    g.InsertEdge(6, 3, 10);
 
 		WHEN("Printing the graph") {
-			std::cout << g << std::endl;
-				THEN("Should not be equal") {
+      std::stringstream ss;
+      ss << g;
+			THEN("It prints out the nodes and their connected edges properly") {
+        const std::string expected_output =
+          std::string("1 (\n")
+        + std::string("  5 | -1\n")
+        + std::string(")\n")
 
-				}
+        + std::string("2 (\n")
+        + std::string("  1 | 1\n")
+        + std::string("  4 | 2\n")
+        + std::string(")\n")
+
+        + std::string("3 (\n")
+        + std::string("  2 | 2\n")
+        + std::string("  6 | -8\n")
+        + std::string(")\n")
+
+        + std::string("4 (\n")
+        + std::string("  1 | -4\n")
+        + std::string("  5 | 3\n")
+        + std::string(")\n")
+
+        + std::string("5 (\n")
+        + std::string("  2 | 7\n")
+        + std::string(")\n")
+
+        + std::string("6 (\n")
+        + std::string("  2 | 5\n")
+        + std::string("  3 | 10\n")
+        + std::string(")\n");
+
+        REQUIRE(ss.str() == expected_output);
+      }
 		}
 	}
 }
-

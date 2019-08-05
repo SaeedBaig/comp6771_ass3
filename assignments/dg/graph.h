@@ -141,12 +141,7 @@ class Graph {
   std::vector<E> GetWeights(const N& src, const N& dst) const;
   bool erase(const N& src, const N& dst, const E& w);
 
-
-  friend bool operator==(const Graph& a, const Graph& b);
-  friend bool operator!=(const Graph& a, const Graph& b);
-  friend std::ostream& operator<<(std::ostream& os, const Graph& graph);
-
-
+  //friends
   friend bool operator==(const Graph& a, const Graph& b) {
 	  return a.nodes_ == b.nodes_ && a.edges_ == b.edges_;
    }

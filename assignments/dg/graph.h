@@ -14,9 +14,8 @@ using std::vector;
 
 namespace gdwg {
 
-template <typename N, typename E>
-class Graph {
- public:
+template <typename N, typename E> class Graph {
+ private:
   struct Node {
     shared_ptr<N> node_ptr_;
     // constructor
@@ -62,13 +61,17 @@ class Graph {
     }
   };
 
+  vector<Node> nodes_;
+  vector<Edge> edges_;
+
+ public:
   class const_iterator {
    public:
     using iterator_category = std::bidirectional_iterator_tag;
     using value_type = tuple<N, N, E>;
     using reference = tuple<const N &, const N &, const E &>;
     using difference_type = int;
-    using pointer = tuple<N, N, E>*;
+    using pointer = tuple<N, N, E> *;
 
     // constructor
     explicit const_iterator(const typename vector<Edge>::const_iterator &it)
@@ -168,10 +171,6 @@ class Graph {
 
     return os;
   }
-
- private:
-  vector<Node> nodes_;
-  vector<Edge> edges_;
 };
 
 }  // namespace gdwg

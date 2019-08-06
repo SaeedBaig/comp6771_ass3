@@ -1,6 +1,5 @@
 //implementation for graph
 
-#include "graph.h"
 using namespace gdwg;
 
 template <typename N, typename E>

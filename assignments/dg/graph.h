@@ -68,6 +68,7 @@ class Graph {
     using value_type = tuple<N, N, E>;
     using reference = tuple<const N &, const N &, const E &>;
     using difference_type = int;
+    using pointer = tuple<N, N, E>*;
 
     // constructor
     explicit const_iterator(const typename vector<Edge>::const_iterator &it)
@@ -102,10 +103,10 @@ class Graph {
   const_reverse_iterator crend() const {
     return const_reverse_iterator{edges_.crend()};
   }
-  const_iterator begin() { return cbegin(); }
-  const_iterator end() { return cend(); }
-  const_reverse_iterator rbegin() { return crbegin(); }
-  const_reverse_iterator rend() { return crend(); }
+  const_iterator begin() const { return cbegin(); }
+  const_iterator end() const { return cend(); }
+  const_reverse_iterator rbegin() const { return crbegin(); }
+  const_reverse_iterator rend() const { return crend(); }
 
   const_iterator find(const N &src, const N &dst, const E &w) const;
   const_iterator erase(const_iterator it);

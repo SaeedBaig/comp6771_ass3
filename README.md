@@ -6,3 +6,4 @@ g++ -std=c++17 file_name.cpp
 
 "Only one of you needs to submit your assignment on give. If both of you do then we use the last submitted one by either of you."
 Well, I am not going to submit any files then. 
+Understood. Saeed will submit the files.

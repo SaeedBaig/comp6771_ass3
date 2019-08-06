@@ -8,7 +8,7 @@
 
 All constructors were tested.
 All operations (copy assignment, move assignment) were tested.
-All methods (except a few iterator methods) were tested.
+All methods were tested.
 All operators (==, !=, <<) were tested.
 All possible exceptions that could be thrown were tested.
 
@@ -1039,9 +1039,6 @@ SCENARIO("Testing begin(), end(), rbegin(), and rend()") {
         REQUIRE(g.end() == g.cend());
       }
     }
-    /*
-    // for some reason, get compiler errors in bazel when we try to use the
-    // reverse iterators
     WHEN("rbegin() is called on it") {
       THEN("It is exactly the same as g.crbegin()") {
         REQUIRE(g.rbegin() == g.crbegin());
@@ -1052,6 +1049,5 @@ SCENARIO("Testing begin(), end(), rbegin(), and rend()") {
         REQUIRE(g.rend() == g.crend());
       }
     }
-    */
   }
 }

@@ -1022,6 +1022,65 @@ SCENARIO("Outputstream test") {
   }
 }
 
+SCENARIO("Testing graph iterator operators") {
+  GIVEN("A graph `g` with edges, and an iterator `it` = g.cbegin()") {
+    gdwg::Graph<int, int> g{1, 2, 3, 4, 5, 6};
+    g.InsertEdge(1, 5, -1);
+    g.InsertEdge(2, 1, 1);
+    g.InsertEdge(2, 4, 2);
+    g.InsertEdge(3, 2, 2);
+
+    WHEN("We do *it") {
+      const auto it = g.cbegin();
+      THEN("We get a tuple containing the source node, destination node, and "
+           "weight of the 1st edge") {
+        REQUIRE(std::get<0>(*it) == 1);
+        REQUIRE(std::get<1>(*it) == 5);
+        REQUIRE(std::get<2>(*it) == -1);
+      }
+    }
+
+    WHEN("We do it++") {
+      auto it = g.cbegin();
+      it++;
+      THEN("We get an iterator to the 2nd edge") {
+        REQUIRE(std::get<0>(*it) == 2);
+        REQUIRE(std::get<1>(*it) == 1);
+        REQUIRE(std::get<2>(*it) == 1);
+      }
+    }
+
+    WHEN("We do it++, then it--") {
+      auto it = g.cbegin();
+      it++;
+      it--;
+      THEN("We get an iterator back to the 1st edge") {
+        REQUIRE(std::get<0>(*it) == 1);
+        REQUIRE(std::get<1>(*it) == 5);
+        REQUIRE(std::get<2>(*it) == -1);
+      }
+    }
+
+    WHEN("We check if 2 iterators to the same edge are ==") {
+      const auto it1 = g.find(2, 4, 2);
+      auto it2 = g.cbegin();
+      it2++;
+      it2++;
+      THEN("== returns true") {
+        REQUIRE(it1 == it2);
+      }
+    }
+
+    WHEN("We check if 2 iterators to different edges are !=") {
+      const auto it1 = g.cbegin();
+      const auto it2 = g.cend();
+      THEN("!= returns true") {
+        REQUIRE(it1 != it2);
+      }
+    }
+  }
+}
+
 SCENARIO("Testing begin(), end(), rbegin(), and rend()") {
   GIVEN("A graph `g` with some edges in it") {
     gdwg::Graph<int, int> g{1, 2, 3, 4, 5, 6};

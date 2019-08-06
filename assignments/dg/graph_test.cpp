@@ -8,7 +8,8 @@
 
 All constructors were tested.
 All operations (copy assignment, move assignment) were tested.
-All methods were tested (on a mix of const and non-const graphs; to test const correctness).
+All methods were tested (on a mix of const and non-const graphs;
+to test const-correctness).
 All operators (==, !=, <<) were tested.
 All possible exceptions that could be thrown were tested.
 

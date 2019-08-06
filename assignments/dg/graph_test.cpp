@@ -8,7 +8,7 @@
 
 All constructors were tested.
 All operations (copy assignment, move assignment) were tested.
-All methods were tested.
+All methods were tested (on a mix of const and non-const graphs; to test const correctness).
 All operators (==, !=, <<) were tested.
 All possible exceptions that could be thrown were tested.
 
@@ -25,16 +25,16 @@ able throw with the expected exception.
 
 SCENARIO("Default constructor test") {
   WHEN("Default constructor is called") {
-    gdwg::Graph<int, int> a;
-    gdwg::Graph<int, int> b{};
+    const gdwg::Graph<int, int> a;
+    const gdwg::Graph<int, int> b{};
     THEN("There should be no segmentation fault") {}
   }
 }
 
 SCENARIO("Constructor with 2 iterators") {
   WHEN("Default constructor is called") {
-    std::vector<std::string> v{"Hello", "how", "are", "you"};
-    gdwg::Graph<std::string, double> graph{v.begin(), v.end()};
+    const std::vector<std::string> v{"Hello", "how", "are", "you"};
+    const gdwg::Graph<std::string, double> graph{v.begin(), v.end()};
 
     THEN("There should be no segmentation fault") {
       REQUIRE(graph.IsNode("Hello") == true);
@@ -49,13 +49,13 @@ SCENARIO("Constructor with 2 iterators") {
 
 SCENARIO("Itearate over tuple constructor test") {
   WHEN("Creating a list to test") {
-    std::string s1{"Hello"};
-    std::string s2{"how"};
-    std::string s3{"are"};
-    auto e1 = std::make_tuple(s1, s2, 5.4);
-    auto e2 = std::make_tuple(s2, s3, 7.6);
+    const std::string s1{"Hello"};
+    const std::string s2{"how"};
+    const std::string s3{"are"};
+    const auto e1 = std::make_tuple(s1, s2, 5.4);
+    const auto e2 = std::make_tuple(s2, s3, 7.6);
     auto e = std::vector<std::tuple<std::string, std::string, double>>{e1, e2};
-    gdwg::Graph<std::string, double> graph{e.begin(), e.end()};
+    const gdwg::Graph<std::string, double> graph{e.begin(), e.end()};
 
     THEN("There should be no segmentation fault") {
       REQUIRE(graph.IsNode("Hello") == true);
@@ -68,7 +68,7 @@ SCENARIO("Itearate over tuple constructor test") {
 
 SCENARIO("Constructor with initialization list") {
   WHEN("Creating a list to test") {
-    gdwg::Graph<char, std::string> graph{'a', 'b', 'x', 'y'};
+    const gdwg::Graph<char, std::string> graph{'a', 'b', 'x', 'y'};
     THEN("There should be no segmentation fault") {
       REQUIRE(graph.IsNode('a') == true);
       REQUIRE(graph.IsNode('b') == true);
@@ -81,9 +81,9 @@ SCENARIO("Constructor with initialization list") {
 
 SCENARIO("Copy constructor test") {
   WHEN("Creating a list to test") {
-    std::vector<std::string> v{"Hello", "how", "are", "you"};
-    gdwg::Graph<std::string, double> graph{v.begin(), v.end()};
-    gdwg::Graph<std::string, double> copy{graph};
+    const std::vector<std::string> v{"Hello", "how", "are", "you"};
+    const gdwg::Graph<std::string, double> graph{v.begin(), v.end()};
+    const gdwg::Graph<std::string, double> copy{graph};
     THEN("There should be no segmentation fault") {
       // property 1 holds
       REQUIRE(graph.IsNode("Hello") == true);
@@ -106,9 +106,9 @@ SCENARIO("Copy constructor test") {
 
 SCENARIO("Move constructor test") {
   WHEN("Creating a list to test") {
-    std::vector<std::string> v{"Hello", "how", "are", "you"};
+    const std::vector<std::string> v{"Hello", "how", "are", "you"};
     gdwg::Graph<std::string, double> graph{v.begin(), v.end()};
-    gdwg::Graph<std::string, double> aMove{std::move(graph)};
+    const gdwg::Graph<std::string, double> aMove{std::move(graph)};
     THEN("There should be no segmentation fault") {
       REQUIRE(graph.IsNode("Hello") == false);
       REQUIRE(graph.IsNode("how") == false);
@@ -127,8 +127,8 @@ SCENARIO("Move constructor test") {
 
 SCENARIO("Copy assignment test") {
   WHEN("Creating a list to test") {
-    std::vector<std::string> v{"Hello", "how", "are", "you"};
-    gdwg::Graph<std::string, double> graph{v.begin(), v.end()};
+    const std::vector<std::string> v{"Hello", "how", "are", "you"};
+    const gdwg::Graph<std::string, double> graph{v.begin(), v.end()};
     gdwg::Graph<std::string, double> empty;
     empty = graph;
     THEN("There should be no segmentation fault") {
@@ -152,7 +152,7 @@ SCENARIO("Copy assignment test") {
 
 SCENARIO("Move assignment test") {
   WHEN("Creating a list to test") {
-    std::vector<std::string> v{"Hello", "how", "are", "you"};
+    const std::vector<std::string> v{"Hello", "how", "are", "you"};
     gdwg::Graph<std::string, double> graph{v.begin(), v.end()};
     gdwg::Graph<std::string, double> empty;
     empty = std::move(graph);
@@ -186,7 +186,7 @@ SCENARIO("Inserting node-that-goes-out-of-scope test") {
   WHEN("Adding a string `s` to a graph and that string `s` goes out of scope") {
     gdwg::Graph<std::string, int> g;
     {
-      std::string s1{"Hello"};
+      const std::string s1{"Hello"};
       g.InsertNode(s1);
     }
 
@@ -551,10 +551,8 @@ SCENARIO("IsConnected true-case test") {
 
 SCENARIO("IsConnected false-case test") {
   GIVEN("A graph") {
-    gdwg::Graph<double, int> g;
+    const gdwg::Graph<double, int> g{4.6, -9.8};
     WHEN("We insert 2 nodes in it but NOT an edge between them") {
-      g.InsertNode(4.6);
-      g.InsertNode(-9.8);
       THEN("Those 2 nodes are NOT connected in the graph") {
         REQUIRE(!g.IsConnected(4.6, -9.8));
       }
@@ -584,9 +582,9 @@ SCENARIO("IsConnected exception test") {
 
 SCENARIO("GetNode() correctness & coverage test") {
   WHEN("A graph contains something and GetNode() is called") {
-    std::vector<std::string> v{"Hello", "how", "are", "you"};
-    gdwg::Graph<std::string, double> graph{v.begin(), v.end()};
-    auto nodes = graph.GetNodes();
+    const std::vector<std::string> v{"Hello", "how", "are", "you"};
+    const gdwg::Graph<std::string, double> graph{v.begin(), v.end()};
+    const auto nodes = graph.GetNodes();
     THEN("Elements should be identifiable in the return vector") {
       REQUIRE(std::find(nodes.begin(), nodes.end(), "Hello") != nodes.end());
       REQUIRE(std::find(nodes.begin(), nodes.end(), "how") != nodes.end());
@@ -642,7 +640,7 @@ SCENARIO("GetConnected() correctness & coverage test") {
   }
 
   WHEN("A graph contains nothing and get nodes") {
-    gdwg::Graph<std::string, int> g;
+    const gdwg::Graph<std::string, int> g;
     THEN("Nothing should be there") {
       REQUIRE_THROWS_WITH(
           g.GetConnected("sydney"),

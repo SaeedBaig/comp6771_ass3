@@ -342,7 +342,7 @@ operator*() const {
 }
 
 
-// ++ operator (postfix) for const_iterator
+// ++ operator (prefix) for const_iterator
 template <typename N, typename E>
 typename Graph<N, E>::const_iterator &Graph<N, E>::const_iterator::
 operator++() {
@@ -351,7 +351,7 @@ operator++() {
 }
 
 
-// ++ operator (prefix) for const_iterator
+// ++ operator (postfix) for const_iterator
 template <typename N, typename E>
 typename Graph<N, E>::const_iterator Graph<N, E>::const_iterator::
 operator++(int) {
@@ -361,7 +361,7 @@ operator++(int) {
 }
 
 
-// -- operator (postfix) for const_iterator
+// -- operator (prefix) for const_iterator
 template <typename N, typename E>
 typename Graph<N, E>::const_iterator &Graph<N, E>::const_iterator::
 operator--() {
@@ -370,7 +370,7 @@ operator--() {
 }
 
 
-// -- operator (prefix) for const_iterator
+// -- operator (postfix) for const_iterator
 template <typename N, typename E>
 typename Graph<N, E>::const_iterator Graph<N, E>::const_iterator::
 operator--(int) {

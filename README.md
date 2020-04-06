@@ -9,10 +9,10 @@ The files I worked on are in `assignments/dg/`.
 ## Building & running
 Run `buil_and_run.sh`. Requires bazel.
 
-To compile for small unit files:
-```cpp
+**NOTE:** To compile for small unit files:
+```sh
 g++ -std=c++17 file_name.cpp
 ./a.out
 ```
 
-Update: Assignment has been submitted. 
+**Update**: Assignment has been submitted. 
